@@ -8,6 +8,7 @@ import sys
 import threading
 import time
 from datetime import datetime
+from logging.handlers import RotatingFileHandler
 from typing import Optional, Dict
 
 import cv2
@@ -39,6 +40,28 @@ CLR_TEXT_DIM    = "#868e96"
 CLR_CAM_SEL     = "#3b5bdb"
 CLR_CAM_IDLE    = "#2a2d3e"
 
+# ─────────────────────────────────────────────────────────────
+#  APP CONSTANTS (extracted from magic numbers)
+# ─────────────────────────────────────────────────────────────
+MAX_RECONNECT_RETRIES = 5          # Số lần retry tối đa khi camera mất kết nối
+RECONNECT_DELAY_SEC = 3            # Delay giữa các lần reconnect
+
+RING_BUFFER_SIZE = 150             # ~5 giây buffer ở 30fps
+RECORD_FUTURE_FRAMES = 150        # ~5 giây ghi thêm sau sự cố
+RECORD_FPS = 30.0                  # FPS khi ghi video sự cố
+VIDEO_ASPECT_RATIO = 9 / 16       # Tỉ lệ chiều cao/rộng (16:9)
+CAM_TILE_HEADER_HEIGHT = 30       # Chiều cao header mỗi camera tile (px)
+RENDER_INTERVAL_MS = 30            # Khoảng cách giữa các lần render (ms)
+IDLE_RENDER_INTERVAL_MS = 50       # Render interval khi idle
+MIN_CELL_WIDTH = 200               # Chiều rộng tối thiểu mỗi camera cell
+SIDE_PANEL_TOTAL_WIDTH = 550       # Ước tính tổng width 2 side panel
+
+# Login credentials
+LOGIN_USERNAME = "admin"
+LOGIN_PASSWORD = "admin"
+MAX_LOGIN_ATTEMPTS = 3
+LOGIN_LOCKOUT_SECONDS = 5
+
 _OBJECT_PALETTE = [
     (255, 180,   0), (  0, 220, 100), (200,   0, 255),
     (  0, 180, 255), (120,   0, 200), (  0, 255, 180),
@@ -59,7 +82,7 @@ class _TextboxHandler(logging.Handler):
                 self.textbox.insert("end", msg)
                 self.textbox.see("end")
             except Exception:
-                pass
+                pass  # Handler KHÔNG ĐƯỢC throw — widget có thể đã bị destroy
         # Phải dùng after() để đưa lệnh update UI về main thread, tránh crash/garble log
         self.textbox.after(0, _append)
 
@@ -74,10 +97,123 @@ class _StdoutRedirect:
                 self.textbox.insert("end", s)
                 self.textbox.see("end")
             except Exception:
-                pass
+                pass  # Widget có thể đã bị destroy khi app đang tắt
         self.textbox.after(0, _append)
 
     def flush(self): pass
+
+
+# ─────────────────────────────────────────────────────────────
+#  LOGIN APP  (root Tk riêng — tránh hoàn toàn zero-window bug)
+# ─────────────────────────────────────────────────────────────
+
+class LoginApp(ctk.CTk):
+    """
+    Cửa sổ đăng nhập chạy như một Tk root độc lập.
+    Sau khi mainloop() kết thúc, kiểm tra self.authenticated để
+    quyết định có khởi động SecurityApp hay không.
+    """
+
+    def __init__(self):
+        super().__init__()
+        ctk.set_appearance_mode("dark")
+        ctk.set_default_color_theme("blue")
+
+        self.title("🔐 Đăng Nhập – Camera AI")
+        self.geometry("420x500")
+        self.resizable(False, False)
+        self.configure(fg_color=CLR_BG)
+
+        self.authenticated = False
+        self._attempts = 0
+        self._locked_until = 0.0
+
+        # Center on screen
+        self.update_idletasks()
+        x = (self.winfo_screenwidth() - 420) // 2
+        y = (self.winfo_screenheight() - 500) // 2
+        self.geometry(f"420x500+{x}+{y}")
+
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+        self._build_ui()
+
+    def _build_ui(self):
+        # Logo area
+        logo_frame = ctk.CTkFrame(self, fg_color="transparent")
+        logo_frame.pack(pady=(40, 10))
+        ctk.CTkLabel(logo_frame, text="⬤", font=ctk.CTkFont(size=36), text_color=CLR_RED).pack()
+        ctk.CTkLabel(logo_frame, text="Camera AI", font=ctk.CTkFont(family="Segoe UI", size=28, weight="bold"), text_color=CLR_TEXT).pack(pady=(8, 0))
+        ctk.CTkLabel(logo_frame, text="Hệ Thống Giám Sát Đa Màn Hình", font=ctk.CTkFont(family="Segoe UI", size=13), text_color=CLR_TEXT_DIM).pack(pady=(2, 0))
+
+        # Divider
+        ctk.CTkFrame(self, fg_color=CLR_BORDER, height=1).pack(fill="x", padx=40, pady=(20, 20))
+
+        # Form
+        form = ctk.CTkFrame(self, fg_color="transparent")
+        form.pack(padx=40, fill="x")
+
+        ctk.CTkLabel(form, text="👤  Tên đăng nhập", font=ctk.CTkFont(size=12, weight="bold"), text_color=CLR_TEXT_DIM, anchor="w").pack(fill="x", pady=(0, 4))
+        self.entry_user = ctk.CTkEntry(form, height=40, fg_color=CLR_PANEL2, border_color=CLR_BORDER, text_color=CLR_TEXT, placeholder_text="Nhập tên đăng nhập...", font=ctk.CTkFont(size=13))
+        self.entry_user.pack(fill="x", pady=(0, 12))
+
+        ctk.CTkLabel(form, text="🔒  Mật khẩu", font=ctk.CTkFont(size=12, weight="bold"), text_color=CLR_TEXT_DIM, anchor="w").pack(fill="x", pady=(0, 4))
+        self.entry_pass = ctk.CTkEntry(form, height=40, fg_color=CLR_PANEL2, border_color=CLR_BORDER, text_color=CLR_TEXT, placeholder_text="Nhập mật khẩu...", show="●", font=ctk.CTkFont(size=13))
+        self.entry_pass.pack(fill="x", pady=(0, 20))
+
+        # Bind Enter key
+        self.entry_pass.bind("<Return>", lambda e: self._do_login())
+        self.entry_user.bind("<Return>", lambda e: self.entry_pass.focus())
+
+        self.btn_login = ctk.CTkButton(
+            form, text="Đăng Nhập", height=42,
+            fg_color=CLR_ACCENT, hover_color=CLR_ACCENT_DARK,
+            font=ctk.CTkFont(size=14, weight="bold"), corner_radius=8,
+            command=self._do_login
+        )
+        self.btn_login.pack(fill="x")
+
+        # Error label
+        self.lbl_error = ctk.CTkLabel(self, text="", font=ctk.CTkFont(size=12), text_color=CLR_RED)
+        self.lbl_error.pack(pady=(12, 0))
+
+        self.entry_user.focus()
+
+    def _do_login(self):
+        now = time.time()
+        if now < self._locked_until:
+            remaining = int(self._locked_until - now)
+            self.lbl_error.configure(text=f"⏳ Tài khoản bị khóa. Thử lại sau {remaining}s...")
+            return
+
+        username = self.entry_user.get().strip()
+        password = self.entry_pass.get().strip()
+
+        if username == LOGIN_USERNAME and password == LOGIN_PASSWORD:
+            self.authenticated = True
+            self.destroy()   # Thoát mainloop login một cách sạch — không có 'zero window' vì đây là root
+        else:
+            self._attempts += 1
+            remaining = MAX_LOGIN_ATTEMPTS - self._attempts
+            if remaining > 0:
+                self.lbl_error.configure(text=f"❌ Sai tên đăng nhập hoặc mật khẩu! (Còn {remaining} lần)")
+            else:
+                self._locked_until = now + LOGIN_LOCKOUT_SECONDS
+                self._attempts = 0
+                self.lbl_error.configure(text=f"🔒 Sai quá nhiều lần! Khóa {LOGIN_LOCKOUT_SECONDS}s...")
+            self._shake_window()
+
+    def _shake_window(self):
+        """Micro-animation khi nhập sai."""
+        orig_x = self.winfo_x()
+        orig_y = self.winfo_y()
+        offsets = [10, -10, 8, -8, 5, -5, 3, -3, 0]
+        for i, dx in enumerate(offsets):
+            self.after(i * 40, lambda d=dx: self.geometry(f"+{orig_x + d}+{orig_y}"))
+
+    def _on_close(self):
+        """User bấm X → không đăng nhập → đóng hoàn toàn."""
+        self.authenticated = False
+        self.destroy()
 
 
 class CameraStream:
@@ -98,16 +234,25 @@ class CameraStream:
         self.fps = 0.0
         self._fps_start = time.time()
         self._frame_count = 0
-        self.frame_id = 0 # biến đếm an toàn thay cho id(frame)
+        self.frame_id = 0
         self.is_video_file = False
         self.is_paused = False
         
-        # Phiên bản 2.0: Ring Buffer & Recording
+        # Ring Buffer & Event Recording
         import collections
-        self.frame_buffer = collections.deque(maxlen=150)
+        self.frame_buffer = collections.deque(maxlen=RING_BUFFER_SIZE)
         self.is_recording = False
         self.record_frames_left = 0
         self.record_cooldown = 0
+
+        # Manual Recording
+        self.manual_recording = False
+        self.manual_rec_buffer: list = []
+
+        # Error & Reconnect
+        self.reconnect_count = 0
+        self.has_error = False
+        self.error_message = ""
 
     def start(self):
         src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
@@ -119,7 +264,7 @@ class CameraStream:
 
         self.is_video_file = isinstance(src_val, str) and not src_val.startswith(("http://", "https://", "rtsp://"))
         
-        self.video_fps = 30.0 # Mặc định
+        self.video_fps = RECORD_FPS
         if self.is_video_file:
             fps = self.cap.get(cv2.CAP_PROP_FPS)
             if fps > 0:
@@ -130,6 +275,9 @@ class CameraStream:
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, Config.FRAME_HEIGHT)
 
         self.is_running = True
+        self.reconnect_count = 0
+        self.has_error = False
+        self.error_message = ""
         self.tracker.reset()
         self.thread = threading.Thread(target=self._capture_loop, daemon=True)
         self.thread.start()
@@ -151,14 +299,33 @@ class CameraStream:
                     logger.info("🎬 Phát hết video [%s].", self.source)
                     self.is_running = False
                     break
-                logger.warning(f"[Camera] ⚠️ Mất kết nối từ {self.source}. Đang thử lại sau 3s...")
-                time.sleep(3)
+
+                # Reconnect với retry limit
+                self.reconnect_count += 1
+                if self.reconnect_count > MAX_RECONNECT_RETRIES:
+                    self.has_error = True
+                    self.error_message = f"Mất kết nối sau {MAX_RECONNECT_RETRIES} lần thử"
+                    logger.error("❌ [%s] Ngắt kết nối vĩnh viễn sau %d lần retry.", self.source, MAX_RECONNECT_RETRIES)
+                    self.is_running = False
+                    break
+
+                self.has_error = True
+                self.error_message = f"Đang thử kết nối lại ({self.reconnect_count}/{MAX_RECONNECT_RETRIES})..."
+                logger.warning("⚠️ [%s] Mất kết nối. Thử lại %d/%d sau %ds...", self.source, self.reconnect_count, MAX_RECONNECT_RETRIES, RECONNECT_DELAY_SEC)
+                time.sleep(RECONNECT_DELAY_SEC)
                 if self.cap:
                     self.cap.release()
                 src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
                 self.cap = cv2.VideoCapture(src_val)
                 continue
-            
+
+            # Reset error state khi đọc frame thành công
+            if self.has_error:
+                self.has_error = False
+                self.error_message = ""
+                self.reconnect_count = 0
+                logger.info("✅ [%s] Kết nối lại thành công!", self.source)
+
             self.latest_frame = frame
             self.frame_id += 1
             if not self.is_paused:
@@ -173,13 +340,12 @@ class CameraStream:
                 self._fps_start = now
                 
             if self.is_video_file:
-                # Ép khung hình chờ theo đúng chuẩn thời gian thực (ví dụ 30fps = chờ 0.033s)
                 elapsed = time.time() - last_read_time
                 if elapsed < self.frame_delay:
                     time.sleep(self.frame_delay - elapsed)
                 last_read_time = time.time()
             else:
-                time.sleep(0.01) # Giảm tải CPU cho camera thật
+                time.sleep(0.01)
 
     def stop(self):
         self.is_running = False
@@ -205,10 +371,11 @@ class SecurityApp(ctk.CTk):
         # ── State ──
         self.camera_sources = [str(Config.CAMERA_INDEX)]
         self.active_sources_vars: Dict[str, ctk.BooleanVar] = {}
-        
+
         self.streams: Dict[str, CameraStream] = {}
         self.video_labels: Dict[str, ctk.CTkLabel] = {}
-        
+        self._record_buttons: Dict[str, ctk.CTkButton] = {}
+
         self.class_colors: dict = {}
         self.class_visibility: dict = {}
         self._filter_widgets: dict = {}
@@ -231,11 +398,13 @@ class SecurityApp(ctk.CTk):
         self._build_right_panel()
         self._build_status_bar()
 
-        # Logging setup
+        # Logging setup — RotatingFileHandler thay vì FileHandler thường
         if not os.path.exists("logs"):
             os.makedirs("logs")
         log_filename = datetime.now().strftime("logs/audit_%Y_%m.log")
-        file_handler = logging.FileHandler(log_filename, encoding="utf-8")
+        file_handler = RotatingFileHandler(
+            log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
+        )
         file_handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
         logging.getLogger().addHandler(file_handler)
 
@@ -243,11 +412,12 @@ class SecurityApp(ctk.CTk):
         handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s", "%H:%M:%S"))
         logging.getLogger().addHandler(handler)
         
-        # Vẫn dùng để catch sys.stdout/stderr lên UI, và nó sẽ in ra file log nữa do logger
+        # Vẫn dùng để catch sys.stdout/stderr lên UI
         sys.stdout = _StdoutRedirect(self.log_textbox)
         sys.stderr = _StdoutRedirect(self.log_textbox)
 
         logger.info("=" * 50)
+        logger.info("🔐 Đăng nhập thành công: %s @ %s", LOGIN_USERNAME, datetime.now().strftime("%H:%M:%S %d/%m/%Y"))
         logger.info("✅ Giao diện Camera AI đã khởi động")
         logger.info("⏳ Đang nạp model YOLO...")
         self.detector = ObjectDetector()
@@ -460,7 +630,7 @@ class SecurityApp(ctk.CTk):
 
         self.statusbar_left = ctk.CTkLabel(bar, text="  🟢  Hệ thống sẵn sàng", font=ctk.CTkFont(size=11), text_color=CLR_TEXT_DIM)
         self.statusbar_left.grid(row=0, column=0, padx=10, sticky="w")
-        ctk.CTkLabel(bar, text="Camera AI v2.0   ", font=ctk.CTkFont(size=11), text_color=CLR_TEXT_DIM).grid(row=0, column=2, padx=10, sticky="e")
+        ctk.CTkLabel(bar, text="Camera AI v2.1   ", font=ctk.CTkFont(size=11), text_color=CLR_TEXT_DIM).grid(row=0, column=2, padx=10, sticky="e")
 
     # ════════════════════════════════════════════════════════
     #  UI HELPERS
@@ -565,21 +735,62 @@ class SecurityApp(ctk.CTk):
             cb = ctk.CTkCheckBox(row_f, text=label, variable=self.active_sources_vars[src], font=ctk.CTkFont(size=12, weight="bold" if is_sel else "normal"), text_color=CLR_TEXT if is_sel else CLR_TEXT_DIM, command=self._refresh_camera_list)
             cb.grid(row=0, column=1, padx=4, pady=6, sticky="w")
             
-            # Badge trạng thái nếu đang chạy stream
-            msg = "● LIVE" if src in self.streams and self.streams[src].is_running else ""
-            if msg:
-                ctk.CTkLabel(row_f, text=msg, font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_GREEN).grid(row=0, column=2, padx=(4, 8), pady=6)
+            # Badge trạng thái
+            stream = self.streams.get(src)
+            if stream:
+                if stream.has_error:
+                    ctk.CTkLabel(row_f, text="⚠ LỖI", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_RED).grid(row=0, column=2, padx=(4, 8), pady=6)
+                elif stream.is_running:
+                    ctk.CTkLabel(row_f, text="● LIVE", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_GREEN).grid(row=0, column=2, padx=(4, 8), pady=6)
 
     def _add_camera(self):
         src = self.add_cam_entry.get().strip()
         if src and src not in self.camera_sources:
             self.camera_sources.append(src)
-            self.active_sources_vars[src] = ctk.BooleanVar(value=True) # tự động check khi thêm mới
+            self.active_sources_vars[src] = ctk.BooleanVar(value=True)
             self._refresh_camera_list()
             self.add_cam_entry.delete(0, "end")
             logger.info("➕ Đã thêm camera: %s", src)
         else:
             logger.warning("Camera đã tồn tại hoặc bỏ trống!")
+
+    # ════════════════════════════════════════════════════════
+    #  MANUAL RECORDING
+    # ════════════════════════════════════════════════════════
+
+    def _toggle_manual_record(self, src: str):
+        """Bật/tắt ghi hình thủ công cho camera cụ thể."""
+        stream = self.streams.get(src)
+        if not stream or not stream.is_running:
+            return
+
+        if stream.manual_recording:
+            # Dừng ghi → export video
+            stream.manual_recording = False
+            frames_copy = stream.manual_rec_buffer.copy()
+            stream.manual_rec_buffer.clear()
+
+            btn = self._record_buttons.get(src)
+            if btn:
+                btn.configure(text="⏺", fg_color=CLR_PANEL2, hover_color="#3a3d4e")
+
+            if frames_copy:
+                threading.Thread(
+                    target=self._save_event_video,
+                    args=(frames_copy, f"MANUAL_{stream.display_name}"),
+                    daemon=True
+                ).start()
+                logger.info("⏹ Dừng ghi hình thủ công [%s] — %d frames", stream.display_name, len(frames_copy))
+        else:
+            # Bắt đầu ghi
+            stream.manual_recording = True
+            stream.manual_rec_buffer = list(stream.frame_buffer)
+
+            btn = self._record_buttons.get(src)
+            if btn:
+                btn.configure(text="⏹", fg_color=CLR_RED, hover_color="#e03131")
+
+            logger.info("🔴 Bắt đầu ghi hình thủ công [%s]", stream.display_name)
 
     # ════════════════════════════════════════════════════════
     #  MULTI-CAMERA INFERENCE & RENDER
@@ -598,22 +809,21 @@ class SecurityApp(ctk.CTk):
         for widget in self.video_grid.winfo_children():
             widget.destroy()
         self.video_labels.clear()
+        self._record_buttons.clear()
         
-        # Tính toán Layout (Chia lưới tự động) và kích thước ô vuông cố định
+        # Tính toán Layout (Chia lưới tự động)
         n = len(selected)
-        # Nếu có 1 camera: ưu tiên 1 cột to. 2-4 cam: 2 cột ngang. >=5 cam: 3 cột ngang
         cols = 1 if n == 1 else (2 if n <= 4 else (3 if n <= 9 else 4))
         
-        # Bắt buộc UI tính toán xong layout để lấy chiều rộng chính xác thay vì lấy nhầm 1px
         self.video_grid.update_idletasks()
         grid_w = self.video_grid.winfo_width()
         
         if grid_w < 100: 
-            grid_w = self.winfo_width() - 550 # Lấy tổng chiều rộng trừ đi 2 menu 2 bên (~550px)
+            grid_w = self.winfo_width() - SIDE_PANEL_TOTAL_WIDTH
             if grid_w < 100: grid_w = 900
         
-        cell_w = max(200, (grid_w - 30) // cols) # hạ min xuống 200px để không bị cắt mép ngang
-        cell_h = int(cell_w * 9 / 16) + 30       # Giữ tỷ lệ 16:9 và cộng thêm 30px cho Header
+        cell_w = max(MIN_CELL_WIDTH, (grid_w - 30) // cols)
+        cell_h = int(cell_w * VIDEO_ASPECT_RATIO) + CAM_TILE_HEADER_HEIGHT
         
         for idx in range(n):
             self.video_grid.grid_columnconfigure(idx % cols, weight=1)
@@ -625,7 +835,6 @@ class SecurityApp(ctk.CTk):
             if stream.start():
                 self.streams[src] = stream
                 
-                # Tạo khung chứa riêng cho camera này kèm kích thước cố định để video không bị phóng to từ từ
                 frame_box = ctk.CTkFrame(self.video_grid, fg_color="#181a25", border_width=2, border_color=CLR_BORDER, width=cell_w, height=cell_h)
                 frame_box.grid_propagate(False)
                 r, c = idx // cols, idx % cols
@@ -633,10 +842,21 @@ class SecurityApp(ctk.CTk):
                 frame_box.grid_rowconfigure(1, weight=1)
                 frame_box.grid_columnconfigure(0, weight=1)
                 
-                # Header cam
+                # Header cam (với nút Record)
                 hdr = ctk.CTkFrame(frame_box, fg_color="transparent", height=24)
                 hdr.grid(row=0, column=0, sticky="ew")
-                ctk.CTkLabel(hdr, text=f"  {stream.display_name}", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).pack(side="left")
+                hdr.grid_columnconfigure(0, weight=1)
+                ctk.CTkLabel(hdr, text=f"  {stream.display_name}", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=0, column=0, sticky="w")
+                
+                # Nút Record thủ công
+                rec_btn = ctk.CTkButton(
+                    hdr, text="⏺", width=28, height=22,
+                    fg_color=CLR_PANEL2, hover_color="#3a3d4e",
+                    font=ctk.CTkFont(size=14), corner_radius=4,
+                    command=lambda s=src: self._toggle_manual_record(s)
+                )
+                rec_btn.grid(row=0, column=1, padx=(4, 4), sticky="e")
+                self._record_buttons[src] = rec_btn
                 
                 # Video label
                 lbl = ctk.CTkLabel(frame_box, text="Đang tải...", text_color=CLR_TEXT_DIM)
@@ -656,19 +876,18 @@ class SecurityApp(ctk.CTk):
         self._set_status("ĐANG THEO DÕI", CLR_GREEN, "🟢")
         self._refresh_camera_list()
 
-        # Khởi động thread inference chạy tuần tự cho tất cả camera
+        # Khởi động thread inference
         self.is_inferencing = True
         self._inference_thread = threading.Thread(target=self._multi_inference_loop, daemon=True)
         self._inference_thread.start()
 
     def _multi_inference_loop(self):
         """Vòng lặp AI quét qua tất cả các luồng camera đang chạy để detect theo lô (batch)."""
-        last_processed_frames = {} # dict lưu id frame cuối cùng đã chạy AI
+        last_processed_frames = {}
         
         while self.is_inferencing:
             allowed_ids = self._cached_allowed_ids
             
-            # Để tránh lỗi RuntimeError do dictionary size changes, catch ngoại lệ
             try:
                 active_streams = list(self.streams.items())
             except RuntimeError:
@@ -682,29 +901,36 @@ class SecurityApp(ctk.CTk):
                 if not stream.is_running:
                     continue
                 
-                # Lấy frame mới nhất
                 frame = stream.latest_frame
-                # Chỉ xử lý nếu có frame và KHÁC với frame đã chạy lần trước
                 if frame is not None and stream.frame_id != last_processed_frames.get(src):
                     batch_frames.append(frame)
                     batch_streams.append(stream)
                     last_processed_frames[src] = stream.frame_id
                     
             if batch_frames:
-                # Chạy AI inference cho toàn bộ batch cùng 1 lúc
                 batch_detections = self.detector.detect_batch(batch_frames, allowed_class_ids=allowed_ids)
                 
-                # Cập nhật kết quả về lại cho từng stream
                 for stream, detections in zip(batch_streams, batch_detections):
                     stream.latest_detections = detections
                 
-                time.sleep(0.005) # Delay cực nhỏ để nhường CPU
+                time.sleep(0.005)
             else:
-                time.sleep(0.01) # Nhường CPU lâu hơn nếu không có frame mới
+                time.sleep(0.01)
 
     def _render_loop(self):
+        """Vòng lặp render chính — được bảo vệ bởi try/except."""
+        try:
+            self._render_loop_inner()
+        except Exception as e:
+            logger.error("❌ Lỗi nghiêm trọng trong render loop: %s", e, exc_info=True)
+
+        # Luôn schedule lần render tiếp theo dù có lỗi
+        interval = RENDER_INTERVAL_MS if self.is_inferencing else IDLE_RENDER_INTERVAL_MS
+        self.after(interval, self._render_loop)
+
+    def _render_loop_inner(self):
+        """Logic render thực tế, tách ra để try/except bao bọc."""
         if not self.is_inferencing:
-            self.after(50, self._render_loop)
             return
 
         self._cached_allowed_ids = self._compute_allowed_ids()
@@ -712,13 +938,22 @@ class SecurityApp(ctk.CTk):
         total_obj = 0
         total_fire = 0
         fire_alerted = False
+        has_error_any = False
 
         active_streams = list(self.streams.values())
         
         for stream in active_streams:
             if not stream.is_running:
                 continue
-                
+
+            # Hiển thị error state trên video label
+            if stream.has_error:
+                has_error_any = True
+                lbl = self.video_labels.get(stream.source)
+                if lbl:
+                    lbl.configure(text=f"⚠️ {stream.error_message}", text_color=CLR_RED)
+                continue
+
             frame = stream.latest_frame
             detections = stream.latest_detections
             
@@ -745,14 +980,14 @@ class SecurityApp(ctk.CTk):
                         daemon=True,
                     ).start()
                     
-                    # 2.0 Event Recording Trigger
+                    # Event Recording Trigger
                     if not stream.is_recording and time.time() > stream.record_cooldown:
                         stream.is_recording = True
-                        stream.record_frames_left = 150 # 5s tương lai ở 30fps
-                        stream.rec_buffer = list(stream.frame_buffer) # ~5s quá khứ
-                        logger.info(f"[Record] 🔴 Bắt đầu ghi hình sự cố cho {stream.display_name}...")
+                        stream.record_frames_left = RECORD_FUTURE_FRAMES
+                        stream.rec_buffer = list(stream.frame_buffer)
+                        logger.info("[Record] 🔴 Bắt đầu ghi hình sự cố cho %s...", stream.display_name)
 
-                # Ghi luồng Video tương lai
+                # Ghi luồng Video tương lai (event recording)
                 if stream.is_recording and not stream.is_paused:
                     stream.rec_buffer.append(display_frame.copy())
                     stream.record_frames_left -= 1
@@ -768,6 +1003,10 @@ class SecurityApp(ctk.CTk):
                             daemon=True
                         ).start()
 
+                # Ghi hình thủ công
+                if stream.manual_recording and not stream.is_paused:
+                    stream.manual_rec_buffer.append(display_frame.copy())
+
                 # Render ra grid label
                 lbl = self.video_labels.get(stream.source)
                 if lbl:
@@ -782,21 +1021,24 @@ class SecurityApp(ctk.CTk):
                     fire_alerted = True
 
         self._update_global_stats(total_obj, total_fire, fire_alerted, active_streams)
-        
+
+        # Hiển thị error banner nếu có camera lỗi
+        if has_error_any and not fire_alerted:
+            self._set_status("⚠️ MỘT SỐ CAMERA GẶP LỖI KẾT NỐI", CLR_YELLOW, "🟡")
+
         # Dọn dẹp các stream đã chết
         dead_keys = [k for k, v in self.streams.items() if not v.is_running]
         for k in dead_keys:
+            dead_stream = self.streams[k]
+            if dead_stream.has_error:
+                logger.error("❌ Camera [%s] đã ngắt vĩnh viễn: %s", k, dead_stream.error_message)
             del self.streams[k]
 
-        # Chỉ tự dừng khi đang inference và tất cả stream đã ngắt hết - không dừng khi chưa bắt đầu
         if self.is_inferencing and dead_keys:
             self._refresh_camera_list()
         if self.is_inferencing and not self.streams:
             logger.info("⌛ Tất cả camera đã ngắt, dừng hệ thống.")
             self.stop_all_cameras()
-            return  # render loop sẽ được kết nối lại sau khi stop_all gọi after()
-
-        self.after(30, self._render_loop)
 
     def _display_on_label(self, frame: np.ndarray, lbl: ctk.CTkLabel):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -838,6 +1080,19 @@ class SecurityApp(ctk.CTk):
             self._inference_thread.join(timeout=2.0)
         self._inference_thread = None
 
+        # Dừng manual recording nếu đang ghi
+        for src, stream in self.streams.items():
+            if stream.manual_recording:
+                stream.manual_recording = False
+                if stream.manual_rec_buffer:
+                    frames_copy = stream.manual_rec_buffer.copy()
+                    stream.manual_rec_buffer.clear()
+                    threading.Thread(
+                        target=self._save_event_video,
+                        args=(frames_copy, f"MANUAL_{stream.display_name}"),
+                        daemon=True
+                    ).start()
+
         # Dừng từng luồng
         for stream in self.streams.values():
             stream.stop()
@@ -847,6 +1102,7 @@ class SecurityApp(ctk.CTk):
         for widget in self.video_grid.winfo_children():
             widget.destroy()
         self.video_labels.clear()
+        self._record_buttons.clear()
 
         self.btn_start.configure(state="normal")
         self.btn_pause.configure(state="disabled", text="⏸ Tạm Dừng", fg_color=CLR_YELLOW, text_color="black")
@@ -863,8 +1119,6 @@ class SecurityApp(ctk.CTk):
         self.stat_state.configure(text="—", text_color=CLR_TEXT_DIM)
         
         self._refresh_camera_list()
-        # Tiếp tục render loop ở idle mode (không dừng vòng lặp)
-        self.after(200, self._render_loop)
 
     def toggle_pause(self):
         if not self.streams:
@@ -951,6 +1205,10 @@ class SecurityApp(ctk.CTk):
         cv2.putText(frame, f"Vat the: {len(vis)} | Lua/Khoi: {nf}", (10, 46), cv2.FONT_HERSHEY_SIMPLEX, 0.52, fc, 1)
         cv2.putText(frame, f"{'!!! CANH BAO CHAY !!!' if nf > 0 else 'Binh thuong'}", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.52, fc, 1)
 
+        # Badge Recording nếu đang ghi hình thủ công
+        if stream.manual_recording:
+            cv2.putText(frame, "● REC", (w - 80, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 0, 255), 2)
+
         return frame
         
     def _save_event_video(self, frames: list, source_name: str):
@@ -966,14 +1224,14 @@ class SecurityApp(ctk.CTk):
             
             h, w = frames[0].shape[:2]
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out = cv2.VideoWriter(filepath, fourcc, 30.0, (w, h))
+            out = cv2.VideoWriter(filepath, fourcc, RECORD_FPS, (w, h))
             
             for f in frames:
                 out.write(f)
             out.release()
-            logger.info(f"✅ Đã lưu Video bằng chứng Sự cố (10s) tại: {filepath}")
+            logger.info("✅ Đã lưu video tại: %s (%d frames)", filepath, len(frames))
         except Exception as e:
-            logger.error(f"❌ Lỗi ghi video sự cố: {str(e)}")
+            logger.error("❌ Lỗi ghi video sự cố: %s", e)
 
     def on_closing(self):
         self.stop_all_cameras()
@@ -983,6 +1241,18 @@ class SecurityApp(ctk.CTk):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(levelname)s] %(message)s", datefmt="%H:%M:%S", handlers=[logging.StreamHandler(sys.__stdout__)])
-    app = SecurityApp()
-    app.mainloop()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(asctime)s] [%(levelname)s] %(message)s",
+        datefmt="%H:%M:%S",
+        handlers=[logging.StreamHandler(sys.__stdout__)]
+    )
+
+    # Phase 1: Login — chạy root Tk riêng, mainloop độc lập
+    login_app = LoginApp()
+    login_app.mainloop()
+
+    # Phase 2: Nếu đăng nhập thành công → khởi động app chính
+    if login_app.authenticated:
+        app = SecurityApp()
+        app.mainloop()
