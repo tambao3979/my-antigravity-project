@@ -60,10 +60,11 @@ class Config:
     FIRE_CONFIRM_SECONDS: float = float(os.getenv("FIRE_CONFIRM_SECONDS", "5"))
 
     # ──────────────────────────────────────────────
-    # Telegram
+    # Telegram & Webhook API
     # ──────────────────────────────────────────────
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
     TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
+    WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "")
     ALERT_COOLDOWN_SECONDS: float = float(os.getenv("ALERT_COOLDOWN_SECONDS", "60"))
 
     # ──────────────────────────────────────────────
@@ -82,3 +83,8 @@ class Config:
     COLOR_DANGER = (0, 165, 255)
 
     WINDOW_NAME: str = "🔥 AI Fire Detection Camera"
+    
+    # ──────────────────────────────────────────────
+    # Ghi nhận Sự cố (Event Recording)
+    # ──────────────────────────────────────────────
+    EVENT_DIR: str = os.getenv("EVENT_DIR", "events")

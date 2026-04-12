@@ -92,9 +92,20 @@ def main():
 
 
 if __name__ == "__main__":
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+    
+    import time
+    log_filename = time.strftime("logs/audit_%Y_%m.log")
+    
+    file_handler = logging.FileHandler(log_filename, encoding="utf-8")
+    file_handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
+    
+    stream_handler = logging.StreamHandler(sys.__stdout__)
+    stream_handler.setFormatter(logging.Formatter("[%(asctime)s] [%(levelname)s] %(message)s", "%H:%M:%S"))
+
     logging.basicConfig(
         level=logging.INFO,
-        format="[%(asctime)s] [%(levelname)s] %(message)s",
-        datefmt="%H:%M:%S",
+        handlers=[file_handler, stream_handler]
     )
     main()

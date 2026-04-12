@@ -61,8 +61,9 @@ class TelegramNotifier:
             logger.info("Cooldown cho [%s] còn %.1fs, bỏ qua.", source_name, self.cooldown_remaining(source_name))
             return False
 
-        if not self._token or not self._chat_id:
-            logger.warning("Không có token/chat_id, bỏ qua.")
+        webhook_url = getattr(Config, "WEBHOOK_URL", "")
+        if not self._token and not webhook_url:
+            logger.warning("Cả Telegram Bot và Webhook API đều trống, bỏ qua cảnh báo.")
             return False
 
         now_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -75,13 +76,23 @@ class TelegramNotifier:
             f"⚠️ Hãy kiểm tra ngay lập tức!"
         )
 
-        success = self._send_photo_with_caption(frame, message)
+        success = False
+        
+        # Gửi sang Telegram nếu cấu hình
+        if self._token and self._chat_id:
+            success = self._send_photo_with_caption(frame, message)
+            if success:
+                logger.info("✅ Cảnh báo Telegram cho [%s] đã gửi thành công", source_name)
+            else:
+                logger.error("❌ Gửi Telegram thất bại.")
+                
+        # Gửi sang Webhook API (Third-party App)
+        if webhook_url:
+            webhook_success = self._send_webhook(webhook_url, frame, source_name, num_detections)
+            success = success or webhook_success
 
         if success:
             self._last_sent_times[source_name] = time.time()
-            logger.info("✅ Cảnh báo Telegram cho [%s] đã gửi thành công lúc %s", source_name, now_str)
-        else:
-            logger.error("Gửi Telegram thất bại. Kiểm tra kết nối và token.")
 
         return success
 
@@ -120,7 +131,32 @@ class TelegramNotifier:
             logger.error("Lỗi không xác định: %s", e)
             return False
 
-    def send_text(self, message: str) -> bool:
+    def _send_webhook(self, url: str, frame: np.ndarray, source_name: str, num_detections: int) -> bool:
+        """Gửi Multipart request kèm JSON data và ảnh về API URL của User"""
+        try:
+            _, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            
+            data = {
+                "source": source_name,
+                "timestamp": int(time.time()),
+                "detections": num_detections,
+                "message": "CẢNH BÁO CHÁY"
+            }
+            
+            files = {
+                "image": ("alert.jpg", buffer.tobytes(), "image/jpeg")
+            }
+            
+            response = requests.post(url, data=data, files=files, timeout=5)
+            if response.status_code in (200, 201):
+                logger.info("✅ Đã bắn Webhook API tới ứng dụng User thành công.")
+                return True
+            else:
+                logger.error(f"❌ Cảnh báo: Webhook API trả về mã lỗi {response.status_code}")
+                return False
+        except Exception as e:
+            logger.error(f"❌ Lỗi gửi Webhook API: {e}")
+            return False
         """Gửi tin nhắn văn bản thuần (dùng để test)"""
         try:
             response = requests.post(

@@ -76,6 +76,22 @@ class ObjectDetector:
                 Config.FIRE_CLASS_NAME,
             )
 
+    def update_thresholds(self, fire_conf: float = None, smoke_conf: float = None, default_conf: float = None):
+        """Cập nhật độ nhạy (confidence) ngay trong lúc đang chạy (theo UI)."""
+        if fire_conf is not None:
+            self._conf_map[Config.FIRE_CLASS_NAME.lower()] = fire_conf
+        if smoke_conf is not None:
+            self._conf_map[Config.SMOKE_CLASS_NAME.lower()] = smoke_conf
+        if default_conf is not None:
+            # Cập nhật cho tất cả các class còn lại
+            for cname in self.class_names:
+                key = cname.lower()
+                if key != Config.FIRE_CLASS_NAME.lower() and key != Config.SMOKE_CLASS_NAME.lower():
+                    self._conf_map[key] = default_conf
+            
+        self._min_conf = min(self._conf_map.values()) if self._conf_map else Config.CONFIDENCE_THRESHOLD
+        logger.info(f"[Detector] Đã cập nhật Thresholds -> Lửa: {fire_conf}, Khói: {smoke_conf}, Chung: {default_conf}")
+
     def get_class_id(self, class_name: str) -> int:
         """Trả về class index theo tên, -1 nếu không tìm thấy."""
         for cid, cname in self.model.names.items():

@@ -101,6 +101,13 @@ class CameraStream:
         self.frame_id = 0 # biến đếm an toàn thay cho id(frame)
         self.is_video_file = False
         self.is_paused = False
+        
+        # Phiên bản 2.0: Ring Buffer & Recording
+        import collections
+        self.frame_buffer = collections.deque(maxlen=150)
+        self.is_recording = False
+        self.record_frames_left = 0
+        self.record_cooldown = 0
 
     def start(self):
         src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
@@ -144,11 +151,18 @@ class CameraStream:
                     logger.info("🎬 Phát hết video [%s].", self.source)
                     self.is_running = False
                     break
-                time.sleep(0.1)
+                logger.warning(f"[Camera] ⚠️ Mất kết nối từ {self.source}. Đang thử lại sau 3s...")
+                time.sleep(3)
+                if self.cap:
+                    self.cap.release()
+                src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
+                self.cap = cv2.VideoCapture(src_val)
                 continue
             
             self.latest_frame = frame
             self.frame_id += 1
+            if not self.is_paused:
+                self.frame_buffer.append(frame.copy())
             
             # Tính FPS camera
             self._frame_count += 1
@@ -218,9 +232,18 @@ class SecurityApp(ctk.CTk):
         self._build_status_bar()
 
         # Logging setup
+        if not os.path.exists("logs"):
+            os.makedirs("logs")
+        log_filename = datetime.now().strftime("logs/audit_%Y_%m.log")
+        file_handler = logging.FileHandler(log_filename, encoding="utf-8")
+        file_handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
+        logging.getLogger().addHandler(file_handler)
+
         handler = _TextboxHandler(self.log_textbox)
         handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s", "%H:%M:%S"))
         logging.getLogger().addHandler(handler)
+        
+        # Vẫn dùng để catch sys.stdout/stderr lên UI, và nó sẽ in ra file log nữa do logger
         sys.stdout = _StdoutRedirect(self.log_textbox)
         sys.stderr = _StdoutRedirect(self.log_textbox)
 
@@ -300,6 +323,48 @@ class SecurityApp(ctk.CTk):
         self.btn_stop = ctk.CTkButton(ctrl, text="■ Dừng", height=38, fg_color=CLR_RED, hover_color="#e03131", font=ctk.CTkFont(size=12, weight="bold"), corner_radius=8, state="disabled", command=self.stop_all_cameras)
         self.btn_stop.grid(row=0, column=2, padx=(2, 0), sticky="ew")
 
+        # ── Cấu Hình API (Webhook) ──
+        ctk.CTkLabel(panel, text="🌐  CẤU HÌNH API", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=5, column=0, padx=14, pady=(8, 6), sticky="w")
+        
+        api_frame = ctk.CTkFrame(panel, fg_color=CLR_PANEL2, corner_radius=8)
+        api_frame.grid(row=6, column=0, padx=12, pady=(0, 16), sticky="ew")
+        api_frame.grid_columnconfigure(0, weight=1)
+        
+        self.api_entry = ctk.CTkEntry(api_frame, placeholder_text="Nhập URL API Webhook...", fg_color="#2a2d3e", border_color=CLR_BORDER, text_color=CLR_TEXT, font=ctk.CTkFont(size=11))
+        self.api_entry.grid(row=0, column=0, padx=8, pady=(8, 4), sticky="ew")
+        # Load current API from config
+        if hasattr(Config, "WEBHOOK_URL") and Config.WEBHOOK_URL:
+            self.api_entry.insert(0, Config.WEBHOOK_URL)
+            
+        self.btn_save_api = ctk.CTkButton(api_frame, text="Lưu API", height=28, fg_color="#1864ab", hover_color="#1864ab", font=ctk.CTkFont(size=11, weight="bold"), corner_radius=6, command=self._save_api_config)
+        self.btn_save_api.grid(row=1, column=0, padx=8, pady=(0, 8), sticky="ew")
+
+    def _save_api_config(self):
+        new_api = self.api_entry.get().strip()
+        Config.WEBHOOK_URL = new_api
+        
+        # Save to .env
+        env_path = '.env'
+        lines = []
+        if os.path.exists(env_path):
+            with open(env_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+                
+        found = False
+        with open(env_path, 'w', encoding='utf-8') as f:
+            for line in lines:
+                if line.startswith('WEBHOOK_URL='):
+                    f.write(f'WEBHOOK_URL={new_api}\n')
+                    found = True
+                else:
+                    f.write(line)
+            if not found:
+                f.write(f'WEBHOOK_URL={new_api}\n')
+                
+        logger.info(f"✅ Đã lưu API Webhook thành công: {new_api if new_api else 'Rỗng'}")
+        self.btn_save_api.configure(text="Đã Lưu ✔️", fg_color=CLR_GREEN)
+        self.after(2000, lambda: self.btn_save_api.configure(text="Lưu API", fg_color="#1864ab"))
+
     def _build_video_panel(self):
         outer = ctk.CTkFrame(self, fg_color=CLR_PANEL, corner_radius=12)
         outer.grid(row=1, column=1, sticky="nsew", padx=6, pady=(10, 6))
@@ -349,11 +414,43 @@ class SecurityApp(ctk.CTk):
         self.filter_scroll.grid(row=1, column=0, padx=4, pady=(6, 6), sticky="ew")
         self.filter_scroll.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(panel, text="📋  NHẬT KÝ SỰ KIỆN", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=4, column=0, padx=14, pady=(8, 6), sticky="w")
+        # 🎯 NGƯỠNG NHẬN DIỆN (THRESHOLDS)
+        ctk.CTkLabel(panel, text="⚙️  NGƯỠNG NHẬN DIỆN (CONFIDENCE)", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=4, column=0, padx=14, pady=(8, 2), sticky="w")
+        
+        thresh_frame = ctk.CTkFrame(panel, fg_color=CLR_PANEL2, corner_radius=8)
+        thresh_frame.grid(row=5, column=0, padx=12, pady=(0, 4), sticky="ew")
+        thresh_frame.grid_columnconfigure(0, weight=1)
+        
+        # Fire Slider
+        hdr_f = ctk.CTkFrame(thresh_frame, fg_color="transparent")
+        hdr_f.grid(row=0, column=0, sticky="ew", padx=8, pady=(6, 0))
+        ctk.CTkLabel(hdr_f, text="Lửa & Khói", font=ctk.CTkFont(size=10)).pack(side="left")
+        self.lbl_val_fire = ctk.CTkLabel(hdr_f, text="25%", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_RED)
+        self.lbl_val_fire.pack(side="right")
+        
+        self.slider_fire = ctk.CTkSlider(thresh_frame, from_=0.05, to=0.75, number_of_steps=70, height=12, button_color=CLR_RED, progress_color=CLR_RED, command=self._on_threshold_change)
+        self.slider_fire.set(Config.FIRE_CONFIDENCE_THRESHOLD)
+        self.slider_fire.grid(row=1, column=0, padx=8, pady=(0, 6), sticky="ew")
+        self.lbl_val_fire.configure(text=f"{int(self.slider_fire.get()*100)}%")
+
+        # Default Object Slider
+        hdr_d = ctk.CTkFrame(thresh_frame, fg_color="transparent")
+        hdr_d.grid(row=2, column=0, sticky="ew", padx=8, pady=(2, 0))
+        ctk.CTkLabel(hdr_d, text="Vật thể chung", font=ctk.CTkFont(size=10)).pack(side="left")
+        self.lbl_val_def = ctk.CTkLabel(hdr_d, text="25%", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_ACCENT)
+        self.lbl_val_def.pack(side="right")
+
+        self.slider_def = ctk.CTkSlider(thresh_frame, from_=0.15, to=0.85, number_of_steps=70, height=12, button_color=CLR_ACCENT, progress_color=CLR_ACCENT, command=self._on_threshold_change)
+        self.slider_def.set(Config.CONFIDENCE_THRESHOLD)
+        self.slider_def.grid(row=3, column=0, padx=8, pady=(0, 8), sticky="ew")
+        self.lbl_val_def.configure(text=f"{int(self.slider_def.get()*100)}%")
+
+
+        ctk.CTkLabel(panel, text="📋  NHẬT KÝ SỰ KIỆN", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=6, column=0, padx=14, pady=(8, 6), sticky="w")
 
         self.log_textbox = ctk.CTkTextbox(panel, wrap="word", fg_color=CLR_PANEL2, text_color=CLR_TEXT, font=ctk.CTkFont(family="Consolas", size=11), border_color=CLR_BORDER, border_width=1, corner_radius=8)
-        self.log_textbox.grid(row=5, column=0, padx=12, pady=(0, 12), sticky="nsew")
-        panel.grid_rowconfigure(5, weight=1)
+        self.log_textbox.grid(row=7, column=0, padx=12, pady=(0, 12), sticky="nsew")
+        panel.grid_rowconfigure(7, weight=1)
 
     def _build_status_bar(self):
         bar = ctk.CTkFrame(self, fg_color=CLR_PANEL, height=30, corner_radius=0)
@@ -384,6 +481,15 @@ class SecurityApp(ctk.CTk):
 
     def _set_status(self, msg: str, color: str, icon: str = "⚪"):
         self.statusbar_left.configure(text=f"  {icon}  {msg}", text_color=color)
+
+    def _on_threshold_change(self, value=None):
+        if hasattr(self, 'detector'):
+            fire_conf = self.slider_fire.get()
+            def_conf = self.slider_def.get()
+            self.lbl_val_fire.configure(text=f"{int(fire_conf*100)}%")
+            self.lbl_val_def.configure(text=f"{int(def_conf*100)}%")
+            # Khói dùng chung mốc lưới với Lửa
+            self.detector.update_thresholds(fire_conf=fire_conf, smoke_conf=fire_conf, default_conf=def_conf)
 
     # ════════════════════════════════════════════════════════
     #  CLASS FILTER 
@@ -638,6 +744,29 @@ class SecurityApp(ctk.CTk):
                         args=(display_frame.copy(), len(fire_dets), stream.display_name),
                         daemon=True,
                     ).start()
+                    
+                    # 2.0 Event Recording Trigger
+                    if not stream.is_recording and time.time() > stream.record_cooldown:
+                        stream.is_recording = True
+                        stream.record_frames_left = 150 # 5s tương lai ở 30fps
+                        stream.rec_buffer = list(stream.frame_buffer) # ~5s quá khứ
+                        logger.info(f"[Record] 🔴 Bắt đầu ghi hình sự cố cho {stream.display_name}...")
+
+                # Ghi luồng Video tương lai
+                if stream.is_recording and not stream.is_paused:
+                    stream.rec_buffer.append(display_frame.copy())
+                    stream.record_frames_left -= 1
+                    
+                    if stream.record_frames_left <= 0:
+                        stream.is_recording = False
+                        stream.record_cooldown = time.time() + Config.ALERT_COOLDOWN_SECONDS
+                        frames_copy = stream.rec_buffer.copy()
+                        stream.rec_buffer.clear()
+                        threading.Thread(
+                            target=self._save_event_video,
+                            args=(frames_copy, stream.display_name),
+                            daemon=True
+                        ).start()
 
                 # Render ra grid label
                 lbl = self.video_labels.get(stream.source)
@@ -823,6 +952,28 @@ class SecurityApp(ctk.CTk):
         cv2.putText(frame, f"{'!!! CANH BAO CHAY !!!' if nf > 0 else 'Binh thuong'}", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.52, fc, 1)
 
         return frame
+        
+    def _save_event_video(self, frames: list, source_name: str):
+        if not frames: return
+        try:
+            event_dir = getattr(Config, "EVENT_DIR", "events")
+            if not os.path.exists(event_dir):
+                os.makedirs(event_dir)
+                
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            safe_name = source_name.replace(":", "").replace("/", "_").replace("\\", "_")
+            filepath = os.path.join(event_dir, f"FIRE_{safe_name}_{timestamp}.mp4")
+            
+            h, w = frames[0].shape[:2]
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            out = cv2.VideoWriter(filepath, fourcc, 30.0, (w, h))
+            
+            for f in frames:
+                out.write(f)
+            out.release()
+            logger.info(f"✅ Đã lưu Video bằng chứng Sự cố (10s) tại: {filepath}")
+        except Exception as e:
+            logger.error(f"❌ Lỗi ghi video sự cố: {str(e)}")
 
     def on_closing(self):
         self.stop_all_cameras()
