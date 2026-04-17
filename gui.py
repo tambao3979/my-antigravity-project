@@ -17,6 +17,7 @@ import numpy as np
 from PIL import Image
 
 from config import Config
+from logger_config import setup_logging
 from detector import ObjectDetector
 from fire_tracker import FireTracker
 from telegram_notifier import TelegramNotifier
@@ -124,6 +125,14 @@ class LoginApp(ctk.CTk):
         self.resizable(False, False)
         self.configure(fg_color=CLR_BG)
 
+        # Đặt icon taskbar / tiêu đề cửa sổ
+        _ico_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+        if os.path.exists(_ico_path):
+            try:
+                self.iconbitmap(_ico_path)
+            except Exception:
+                pass
+
         self.authenticated = False
         self._attempts = 0
         self._locked_until = 0.0
@@ -141,7 +150,21 @@ class LoginApp(ctk.CTk):
         # Logo area
         logo_frame = ctk.CTkFrame(self, fg_color="transparent")
         logo_frame.pack(pady=(40, 10))
-        ctk.CTkLabel(logo_frame, text="⬤", font=ctk.CTkFont(size=36), text_color=CLR_RED).pack()
+
+        # Hiển thị logo công ty từ file ICO
+        _ico_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+        _logo_shown = False
+        if os.path.exists(_ico_path):
+            try:
+                _pil_img = Image.open(_ico_path).convert("RGBA").resize((72, 72), Image.LANCZOS)
+                self._login_logo_img = ctk.CTkImage(light_image=_pil_img, dark_image=_pil_img, size=(72, 72))
+                ctk.CTkLabel(logo_frame, image=self._login_logo_img, text="").pack()
+                _logo_shown = True
+            except Exception:
+                pass
+        if not _logo_shown:
+            ctk.CTkLabel(logo_frame, text="⬤", font=ctk.CTkFont(size=36), text_color=CLR_RED).pack()
+
         ctk.CTkLabel(logo_frame, text="Camera AI", font=ctk.CTkFont(family="Segoe UI", size=28, weight="bold"), text_color=CLR_TEXT).pack(pady=(8, 0))
         ctk.CTkLabel(logo_frame, text="Hệ Thống Giám Sát Đa Màn Hình", font=ctk.CTkFont(family="Segoe UI", size=13), text_color=CLR_TEXT_DIM).pack(pady=(2, 0))
 
@@ -366,6 +389,14 @@ class SecurityApp(ctk.CTk):
 
         self.title("🔥 Camera AI – Hệ Thống Giám Sát")
         self.geometry("1400x820")
+
+        # Đặt icon taskbar / tiêu đề cửa sổ chính
+        _ico_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+        if os.path.exists(_ico_path):
+            try:
+                self.iconbitmap(_ico_path)
+            except Exception:
+                pass
         self.minsize(1100, 680)
 
         # ── State ──
@@ -375,6 +406,10 @@ class SecurityApp(ctk.CTk):
         self.streams: Dict[str, CameraStream] = {}
         self.video_labels: Dict[str, ctk.CTkLabel] = {}
         self._record_buttons: Dict[str, ctk.CTkButton] = {}
+        
+        self._video_frames: Dict[str, ctk.CTkFrame] = {}
+        self._grid_configs: Dict[str, dict] = {}
+        self._zoomed_src: Optional[str] = None
 
         self.class_colors: dict = {}
         self.class_visibility: dict = {}
@@ -398,16 +433,8 @@ class SecurityApp(ctk.CTk):
         self._build_right_panel()
         self._build_status_bar()
 
-        # Logging setup — RotatingFileHandler thay vì FileHandler thường
-        if not os.path.exists("logs"):
-            os.makedirs("logs")
-        log_filename = datetime.now().strftime("logs/audit_%Y_%m.log")
-        file_handler = RotatingFileHandler(
-            log_filename, maxBytes=10 * 1024 * 1024, backupCount=5, encoding="utf-8"
-        )
-        file_handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S"))
-        logging.getLogger().addHandler(file_handler)
-
+        # Gắn Handler giao diện để xem log trên app (tạo Log Box)
+        # Các stream Logging chuẩn đã được xử lý bởi setup_logging gốc
         handler = _TextboxHandler(self.log_textbox)
         handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s", "%H:%M:%S"))
         logging.getLogger().addHandler(handler)
@@ -448,7 +475,21 @@ class SecurityApp(ctk.CTk):
 
         logo = ctk.CTkFrame(hdr, fg_color="transparent")
         logo.grid(row=0, column=0, padx=(20, 0), pady=8, sticky="w")
-        ctk.CTkLabel(logo, text="⬤", font=ctk.CTkFont(size=18), text_color=CLR_RED).pack(side="left", padx=(0, 6))
+
+        # Hiển thị logo công ty ở header
+        _ico_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logo.ico")
+        _header_logo_shown = False
+        if os.path.exists(_ico_path):
+            try:
+                _pil_img = Image.open(_ico_path).convert("RGBA").resize((36, 36), Image.LANCZOS)
+                self._header_logo_img = ctk.CTkImage(light_image=_pil_img, dark_image=_pil_img, size=(36, 36))
+                ctk.CTkLabel(logo, image=self._header_logo_img, text="").pack(side="left", padx=(0, 8))
+                _header_logo_shown = True
+            except Exception:
+                pass
+        if not _header_logo_shown:
+            ctk.CTkLabel(logo, text="⬤", font=ctk.CTkFont(size=18), text_color=CLR_RED).pack(side="left", padx=(0, 6))
+
         ctk.CTkLabel(logo, text="Camera AI", font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"), text_color=CLR_TEXT).pack(side="left")
         ctk.CTkLabel(logo, text=" · Hệ Thống Giám Sát Đa Màn Hình", font=ctk.CTkFont(family="Segoe UI", size=13), text_color=CLR_TEXT_DIM).pack(side="left")
 
@@ -598,7 +639,7 @@ class SecurityApp(ctk.CTk):
         self.lbl_val_fire = ctk.CTkLabel(hdr_f, text="25%", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_RED)
         self.lbl_val_fire.pack(side="right")
         
-        self.slider_fire = ctk.CTkSlider(thresh_frame, from_=0.05, to=0.75, number_of_steps=70, height=12, button_color=CLR_RED, progress_color=CLR_RED, command=self._on_threshold_change)
+        self.slider_fire = ctk.CTkSlider(thresh_frame, from_=0.01, to=0.75, number_of_steps=74, height=12, button_color=CLR_RED, progress_color=CLR_RED, command=self._on_threshold_change)
         self.slider_fire.set(Config.FIRE_CONFIDENCE_THRESHOLD)
         self.slider_fire.grid(row=1, column=0, padx=8, pady=(0, 6), sticky="ew")
         self.lbl_val_fire.configure(text=f"{int(self.slider_fire.get()*100)}%")
@@ -793,6 +834,53 @@ class SecurityApp(ctk.CTk):
             logger.info("🔴 Bắt đầu ghi hình thủ công [%s]", stream.display_name)
 
     # ════════════════════════════════════════════════════════
+    #  ZOOM CAMERA
+    # ════════════════════════════════════════════════════════
+
+    def _toggle_zoom(self, src: str):
+        if not self._video_frames:
+            return
+
+        n = len(self._video_frames)
+        cols = 1 if n == 1 else (2 if n <= 4 else (3 if n <= 9 else 4))
+
+        if self._zoomed_src == src:
+            # Unzoom
+            self._zoomed_src = None
+            
+            # Khôi phục weight của grid
+            for idx in range(n):
+                self.video_grid.grid_columnconfigure(idx % cols, weight=1)
+                self.video_grid.grid_rowconfigure(idx // cols, weight=1)
+                
+            # Hiện lại và cấu hình vị trí cũ cho tất cả frame
+            for s, fb in self._video_frames.items():
+                cfg = self._grid_configs[s]
+                fb.grid(row=cfg["row"], column=cfg["column"], padx=4, pady=4, sticky="nsew")
+                fb.configure(border_color=CLR_BORDER, border_width=2)
+            logger.info("🔍 Thu nhỏ camera: hiển thị tất cả grid")
+        else:
+            # Zoom logic
+            self._zoomed_src = src
+            
+            for r in range((n - 1) // cols + 1):
+                self.video_grid.grid_rowconfigure(r, weight=0)
+            for c in range(cols):
+                self.video_grid.grid_columnconfigure(c, weight=0)
+
+            # Cấu hình độc nhất ô top-left
+            self.video_grid.grid_columnconfigure(0, weight=1)
+            self.video_grid.grid_rowconfigure(0, weight=1)
+            
+            for s, fb in self._video_frames.items():
+                if s == src:
+                    fb.grid(row=0, column=0, padx=4, pady=4, sticky="nsew")
+                    fb.configure(border_color=CLR_ACCENT, border_width=3)
+                else:
+                    fb.grid_remove() # Ẩn khỏi grid view
+            logger.info("🔍 Phóng to video")
+
+    # ════════════════════════════════════════════════════════
     #  MULTI-CAMERA INFERENCE & RENDER
     # ════════════════════════════════════════════════════════
 
@@ -810,6 +898,9 @@ class SecurityApp(ctk.CTk):
             widget.destroy()
         self.video_labels.clear()
         self._record_buttons.clear()
+        self._video_frames.clear()
+        self._grid_configs.clear()
+        self._zoomed_src = None
         
         # Tính toán Layout (Chia lưới tự động)
         n = len(selected)
@@ -842,11 +933,15 @@ class SecurityApp(ctk.CTk):
                 frame_box.grid_rowconfigure(1, weight=1)
                 frame_box.grid_columnconfigure(0, weight=1)
                 
+                self._video_frames[src] = frame_box
+                self._grid_configs[src] = {"row": r, "column": c}
+
                 # Header cam (với nút Record)
                 hdr = ctk.CTkFrame(frame_box, fg_color="transparent", height=24)
                 hdr.grid(row=0, column=0, sticky="ew")
                 hdr.grid_columnconfigure(0, weight=1)
-                ctk.CTkLabel(hdr, text=f"  {stream.display_name}", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=0, column=0, sticky="w")
+                lbl_title = ctk.CTkLabel(hdr, text=f"  {stream.display_name}", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM, cursor="hand2")
+                lbl_title.grid(row=0, column=0, sticky="w")
                 
                 # Nút Record thủ công
                 rec_btn = ctk.CTkButton(
@@ -859,9 +954,15 @@ class SecurityApp(ctk.CTk):
                 self._record_buttons[src] = rec_btn
                 
                 # Video label
-                lbl = ctk.CTkLabel(frame_box, text="Đang tải...", text_color=CLR_TEXT_DIM)
+                lbl = ctk.CTkLabel(frame_box, text="Đang tải...", text_color=CLR_TEXT_DIM, cursor="hand2")
                 lbl.grid(row=1, column=0, sticky="nsew")
                 self.video_labels[src] = lbl
+
+                # Bind click events for zooming
+                lbl.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
+                lbl_title.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
+                hdr.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
+                frame_box.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
 
         if not self.streams:
             self._set_status("LỖI: Chẳng có camera nào kết nối được", CLR_RED, "🔴")
@@ -1103,6 +1204,9 @@ class SecurityApp(ctk.CTk):
             widget.destroy()
         self.video_labels.clear()
         self._record_buttons.clear()
+        self._video_frames.clear()
+        self._grid_configs.clear()
+        self._zoomed_src = None
 
         self.btn_start.configure(state="normal")
         self.btn_pause.configure(state="disabled", text="⏸ Tạm Dừng", fg_color=CLR_YELLOW, text_color="black")
@@ -1241,12 +1345,7 @@ class SecurityApp(ctk.CTk):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="[%(asctime)s] [%(levelname)s] %(message)s",
-        datefmt="%H:%M:%S",
-        handlers=[logging.StreamHandler(sys.__stdout__)]
-    )
+    setup_logging()
 
     # Phase 1: Login — chạy root Tk riêng, mainloop độc lập
     login_app = LoginApp()

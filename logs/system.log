@@ -1,0 +1,11 @@
+[2026-04-16 20:22:21] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-16 20:22:27] [INFO] [__main__] ==================================================
+[2026-04-16 20:22:27] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:22:27 16/04/2026
+[2026-04-16 20:22:27] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-16 20:22:27] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-16 20:22:27] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-16 20:22:27] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-16 20:22:27] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-16 20:22:27] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-16 20:22:27] [INFO] [__main__] ==================================================
+[2026-04-16 20:22:33] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
