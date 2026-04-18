@@ -47,16 +47,8 @@ class ObjectDetector:
         self.class_names: List[str] = list(self.model.names.values())
         logger.info("Tải model thành công. Các nhãn: %s", self.class_names)
 
-        # Cache: tên class (lowercase) → ngưỡng confidence
-        self._conf_map: dict = {}
-        for cname in self.class_names:
-            key = cname.lower()
-            if key == Config.FIRE_CLASS_NAME.lower():
-                self._conf_map[key] = Config.FIRE_CONFIDENCE_THRESHOLD
-            elif key == Config.SMOKE_CLASS_NAME.lower():
-                self._conf_map[key] = Config.SMOKE_CONFIDENCE_THRESHOLD
-            else:
-                self._conf_map[key] = Config.CONFIDENCE_THRESHOLD
+        # Min confidence cho YOLO predict (thấp nhất để post-filter ở GUI)
+        self._min_conf: float = 0.01
 
         # Cache: hazard class IDs (luôn bảo vệ khi lọc)
         self._hazard_ids: Set[int] = set()
@@ -64,33 +56,12 @@ class ObjectDetector:
             if cname.lower() in Config.HAZARD_CLASS_NAMES:
                 self._hazard_ids.add(cid)
 
-        # Min confidence cho YOLO predict
-        self._min_conf: float = (
-            min(self._conf_map.values()) if self._conf_map else Config.CONFIDENCE_THRESHOLD
-        )
-
         # Cảnh báo nếu model không có nhãn fire
         if Config.FIRE_CLASS_NAME.lower() not in {c.lower() for c in self.class_names}:
             logger.warning(
                 "Không tìm thấy nhãn '%s' trong model. Kiểm tra FIRE_CLASS_NAME.",
                 Config.FIRE_CLASS_NAME,
             )
-
-    def update_thresholds(self, fire_conf: float = None, smoke_conf: float = None, default_conf: float = None):
-        """Cập nhật độ nhạy (confidence) ngay trong lúc đang chạy (theo UI)."""
-        if fire_conf is not None:
-            self._conf_map[Config.FIRE_CLASS_NAME.lower()] = fire_conf
-        if smoke_conf is not None:
-            self._conf_map[Config.SMOKE_CLASS_NAME.lower()] = smoke_conf
-        if default_conf is not None:
-            # Cập nhật cho tất cả các class còn lại
-            for cname in self.class_names:
-                key = cname.lower()
-                if key != Config.FIRE_CLASS_NAME.lower() and key != Config.SMOKE_CLASS_NAME.lower():
-                    self._conf_map[key] = default_conf
-            
-        self._min_conf = min(self._conf_map.values()) if self._conf_map else Config.CONFIDENCE_THRESHOLD
-        logger.info(f"[Detector] Đã cập nhật Thresholds -> Lửa: {fire_conf}, Khói: {smoke_conf}, Chung: {default_conf}")
 
     def get_class_id(self, class_name: str) -> int:
         """Trả về class index theo tên, -1 nếu không tìm thấy."""
@@ -132,10 +103,7 @@ class ObjectDetector:
                     class_name = self.model.names[class_id]
                     confidence = float(box.conf[0])
 
-                    req_conf = self._conf_map.get(class_name.lower(), Config.CONFIDENCE_THRESHOLD)
-                    if confidence < req_conf:
-                        continue
-
+                    # Post-filtering sẽ được thực hiện ở lớp GUI (per-camera)
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
                     detections.append(
                         Detection(

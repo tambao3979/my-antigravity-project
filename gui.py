@@ -414,6 +414,15 @@ class SecurityApp(ctk.CTk):
         self.class_colors: dict = {}
         self.class_visibility: dict = {}
         self._filter_widgets: dict = {}
+        
+        self.camera_configs: dict = {
+            "Tất cả Camera": {
+                "fire_conf": Config.FIRE_CONFIDENCE_THRESHOLD,
+                "def_conf": Config.CONFIDENCE_THRESHOLD,
+                "class_visibility": {}
+            }
+        }
+        self.config_target_var = ctk.StringVar(value="Tất cả Camera")
 
         self.is_inferencing = False
         self._inference_thread: Optional[threading.Thread] = None
@@ -492,6 +501,16 @@ class SecurityApp(ctk.CTk):
 
         ctk.CTkLabel(logo, text="Camera AI", font=ctk.CTkFont(family="Segoe UI", size=18, weight="bold"), text_color=CLR_TEXT).pack(side="left")
         ctk.CTkLabel(logo, text=" · Hệ Thống Giám Sát Đa Màn Hình", font=ctk.CTkFont(family="Segoe UI", size=13), text_color=CLR_TEXT_DIM).pack(side="left")
+
+        # Thêm khung cho các nút mở thư mục
+        btn_frame = ctk.CTkFrame(hdr, fg_color="transparent")
+        btn_frame.grid(row=0, column=1, padx=20, sticky="e")
+        
+        btn_events = ctk.CTkButton(btn_frame, text="📁 Events (Video)", width=120, height=28, font=ctk.CTkFont(size=12, weight="bold"), fg_color=CLR_PANEL2, hover_color="#3a3d4e", command=self._open_events_folder)
+        btn_events.pack(side="right", padx=5)
+        
+        btn_logs = ctk.CTkButton(btn_frame, text="📁 Logs (Lịch sử)", width=120, height=28, font=ctk.CTkFont(size=12, weight="bold"), fg_color=CLR_PANEL2, hover_color="#3a3d4e", command=self._open_logs_folder)
+        btn_logs.pack(side="right", padx=5)
 
         self.clock_label = ctk.CTkLabel(hdr, text="", font=ctk.CTkFont(family="Segoe UI Mono", size=14), text_color=CLR_TEXT_DIM)
         self.clock_label.grid(row=0, column=2, padx=20, pady=8, sticky="e")
@@ -577,12 +596,12 @@ class SecurityApp(ctk.CTk):
         self.after(2000, lambda: self.btn_save_api.configure(text="Lưu API", fg_color="#1864ab"))
 
     def _build_video_panel(self):
-        outer = ctk.CTkFrame(self, fg_color=CLR_PANEL, corner_radius=12)
-        outer.grid(row=1, column=1, sticky="nsew", padx=6, pady=(10, 6))
-        outer.grid_rowconfigure(1, weight=1)
-        outer.grid_columnconfigure(0, weight=1)
+        self.video_panel_container = ctk.CTkFrame(self, fg_color=CLR_PANEL, corner_radius=12)
+        self.video_panel_container.grid(row=1, column=1, sticky="nsew", padx=6, pady=(10, 6))
+        self.video_panel_container.grid_rowconfigure(1, weight=1)
+        self.video_panel_container.grid_columnconfigure(0, weight=1)
 
-        vhdr = ctk.CTkFrame(outer, fg_color=CLR_PANEL2, height=36, corner_radius=0)
+        vhdr = ctk.CTkFrame(self.video_panel_container, fg_color=CLR_PANEL2, height=36, corner_radius=0)
         vhdr.grid(row=0, column=0, sticky="ew")
         vhdr.grid_columnconfigure(1, weight=1)
         vhdr.grid_propagate(False)
@@ -593,8 +612,28 @@ class SecurityApp(ctk.CTk):
         self.feed_count_label.grid(row=0, column=1, padx=8, sticky="e")
 
         # Scrollable grid container cho nhiều camera
-        self.video_grid = ctk.CTkScrollableFrame(outer, fg_color="black", corner_radius=0)
+        self.video_grid = ctk.CTkScrollableFrame(self.video_panel_container, fg_color="black", corner_radius=0)
         self.video_grid.grid(row=1, column=0, sticky="nsew")
+
+        # Khung Overlay dùng cho chức năng phóng to (Zoom)
+        self.zoom_overlay = ctk.CTkFrame(self.video_panel_container, fg_color="black", corner_radius=0)
+        self.zoom_overlay.grid_rowconfigure(1, weight=1)
+        self.zoom_overlay.grid_columnconfigure(0, weight=1)
+        
+        self.zoom_hdr = ctk.CTkFrame(self.zoom_overlay, fg_color="transparent", height=24)
+        self.zoom_hdr.grid(row=0, column=0, sticky="ew")
+        self.zoom_hdr.grid_columnconfigure(0, weight=1)
+        
+        self.zoom_lbl_title = ctk.CTkLabel(self.zoom_hdr, text="🔍 Chế độ phóng to", font=ctk.CTkFont(size=12, weight="bold"), text_color=CLR_TEXT_DIM, cursor="hand2")
+        self.zoom_lbl_title.grid(row=0, column=0, sticky="w", padx=8)
+        self.zoom_lbl_title.bind("<Button-1>", lambda e: self._toggle_zoom(self._zoomed_src) if self._zoomed_src else None)
+        
+        btn_close_zoom = ctk.CTkButton(self.zoom_hdr, text="❌ Đóng", width=60, height=20, fg_color=CLR_RED, hover_color="#e03131", command=lambda: self._toggle_zoom(self._zoomed_src) if self._zoomed_src else None)
+        btn_close_zoom.grid(row=0, column=1, padx=8)
+        
+        self.zoom_lbl_video = ctk.CTkLabel(self.zoom_overlay, text="")
+        self.zoom_lbl_video.grid(row=1, column=0, sticky="nsew")
+        self.zoom_lbl_video.bind("<Button-1>", lambda e: self._toggle_zoom(self._zoomed_src) if self._zoomed_src else None)
 
     def _build_right_panel(self):
         panel = ctk.CTkFrame(self, fg_color=CLR_PANEL, width=256, corner_radius=12)
@@ -626,10 +665,19 @@ class SecurityApp(ctk.CTk):
         self.filter_scroll.grid_columnconfigure(0, weight=1)
 
         # 🎯 NGƯỠNG NHẬN DIỆN (THRESHOLDS)
-        ctk.CTkLabel(panel, text="⚙️  NGƯỠNG NHẬN DIỆN (CONFIDENCE)", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=4, column=0, padx=14, pady=(8, 2), sticky="w")
+        ctk.CTkLabel(panel, text="⚙️  CẤU HÌNH NHẬN DIỆN", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=4, column=0, padx=14, pady=(8, 2), sticky="w")
+        
+        self.config_target_menu = ctk.CTkOptionMenu(
+            panel, variable=self.config_target_var,
+            values=["Tất cả Camera"], 
+            command=self._on_config_target_change,
+            fg_color=CLR_PANEL2, button_color=CLR_PANEL2, button_hover_color=CLR_CAM_IDLE,
+            text_color=CLR_TEXT, font=ctk.CTkFont(size=12, weight="bold")
+        )
+        self.config_target_menu.grid(row=5, column=0, padx=12, pady=(0, 6), sticky="ew")
         
         thresh_frame = ctk.CTkFrame(panel, fg_color=CLR_PANEL2, corner_radius=8)
-        thresh_frame.grid(row=5, column=0, padx=12, pady=(0, 4), sticky="ew")
+        thresh_frame.grid(row=6, column=0, padx=12, pady=(0, 4), sticky="ew")
         thresh_frame.grid_columnconfigure(0, weight=1)
         
         # Fire Slider
@@ -657,11 +705,11 @@ class SecurityApp(ctk.CTk):
         self.lbl_val_def.configure(text=f"{int(self.slider_def.get()*100)}%")
 
 
-        ctk.CTkLabel(panel, text="📋  NHẬT KÝ SỰ KIỆN", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=6, column=0, padx=14, pady=(8, 6), sticky="w")
+        ctk.CTkLabel(panel, text="📋  NHẬT KÝ SỰ KIỆN", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=7, column=0, padx=14, pady=(8, 6), sticky="w")
 
         self.log_textbox = ctk.CTkTextbox(panel, wrap="word", fg_color=CLR_PANEL2, text_color=CLR_TEXT, font=ctk.CTkFont(family="Consolas", size=11), border_color=CLR_BORDER, border_width=1, corner_radius=8)
-        self.log_textbox.grid(row=7, column=0, padx=12, pady=(0, 12), sticky="nsew")
-        panel.grid_rowconfigure(7, weight=1)
+        self.log_textbox.grid(row=8, column=0, padx=12, pady=(0, 12), sticky="nsew")
+        panel.grid_rowconfigure(8, weight=1)
 
     def _build_status_bar(self):
         bar = ctk.CTkFrame(self, fg_color=CLR_PANEL, height=30, corner_radius=0)
@@ -674,8 +722,26 @@ class SecurityApp(ctk.CTk):
         ctk.CTkLabel(bar, text="Camera AI v2.1   ", font=ctk.CTkFont(size=11), text_color=CLR_TEXT_DIM).grid(row=0, column=2, padx=10, sticky="e")
 
     # ════════════════════════════════════════════════════════
-    #  UI HELPERS
+    #  UI HELPERS & ACTIONS
     # ════════════════════════════════════════════════════════
+
+    def _open_events_folder(self):
+        folder = os.path.abspath(Config.EVENT_DIR)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        try:
+            os.startfile(folder)
+        except Exception as e:
+            logger.error("Không thể mở thư mục Events: %s", e)
+
+    def _open_logs_folder(self):
+        folder = os.path.abspath("logs")
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        try:
+            os.startfile(folder)
+        except Exception as e:
+            logger.error("Không thể mở thư mục Logs: %s", e)
 
     def _stat_card(self, parent, title, value, color, row, col):
         card = ctk.CTkFrame(parent, fg_color="#1e2133", corner_radius=6)
@@ -693,23 +759,59 @@ class SecurityApp(ctk.CTk):
     def _set_status(self, msg: str, color: str, icon: str = "⚪"):
         self.statusbar_left.configure(text=f"  {icon}  {msg}", text_color=color)
 
+    def _on_config_target_change(self, target: str):
+        if target not in self.camera_configs:
+            return
+        cfg = self.camera_configs[target]
+        self.slider_fire.set(cfg["fire_conf"])
+        self.slider_def.set(cfg["def_conf"])
+        self.lbl_val_fire.configure(text=f"{int(cfg['fire_conf']*100)}%")
+        self.lbl_val_def.configure(text=f"{int(cfg['def_conf']*100)}%")
+        
+        for cls_name, visible in cfg["class_visibility"].items():
+            if cls_name in self.class_visibility:
+                self.class_visibility[cls_name].set(visible)
+
     def _on_threshold_change(self, value=None):
-        if hasattr(self, 'detector'):
-            fire_conf = self.slider_fire.get()
-            def_conf = self.slider_def.get()
-            self.lbl_val_fire.configure(text=f"{int(fire_conf*100)}%")
-            self.lbl_val_def.configure(text=f"{int(def_conf*100)}%")
-            # Khói dùng chung mốc lưới với Lửa
-            self.detector.update_thresholds(fire_conf=fire_conf, smoke_conf=fire_conf, default_conf=def_conf)
+        if not hasattr(self, 'camera_configs'): return
+        
+        fire_conf = self.slider_fire.get()
+        def_conf = self.slider_def.get()
+        self.lbl_val_fire.configure(text=f"{int(fire_conf*100)}%")
+        self.lbl_val_def.configure(text=f"{int(def_conf*100)}%")
+        
+        target = self.config_target_var.get()
+        if target in self.camera_configs:
+            self.camera_configs[target]["fire_conf"] = fire_conf
+            self.camera_configs[target]["def_conf"] = def_conf
+            
+        if target == "Tất cả Camera":
+            for src, cfg in self.camera_configs.items():
+                if src != "Tất cả Camera":
+                    cfg["fire_conf"] = fire_conf
+                    cfg["def_conf"] = def_conf
 
     # ════════════════════════════════════════════════════════
     #  CLASS FILTER 
     # ════════════════════════════════════════════════════════
 
+    def _on_class_visibility_change(self, class_name: str, var: ctk.BooleanVar):
+        target = self.config_target_var.get()
+        if target in self.camera_configs:
+            self.camera_configs[target]["class_visibility"][class_name] = var.get()
+            
+        if target == "Tất cả Camera":
+            for src, cfg in self.camera_configs.items():
+                cfg["class_visibility"][class_name] = var.get()
+
     def _register_class(self, class_name: str):
         if class_name in self.class_visibility: return
         var = ctk.BooleanVar(value=True)
         self.class_visibility[class_name] = var
+        
+        for cfg in self.camera_configs.values():
+            if class_name not in cfg["class_visibility"]:
+                cfg["class_visibility"][class_name] = True
 
         meta = Config.CLASS_REGISTRY.get(class_name.lower(), {})
         icon = meta.get("icon", "■")
@@ -726,7 +828,8 @@ class SecurityApp(ctk.CTk):
 
         ctk.CTkLabel(row_f, text=icon, text_color=dot_color, font=ctk.CTkFont(size=13)).grid(row=0, column=0, padx=(8, 4), pady=4)
         ctk.CTkLabel(row_f, text=class_name.upper(), font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT, anchor="w").grid(row=0, column=1, padx=2, pady=4, sticky="ew")
-        ctk.CTkCheckBox(row_f, text="", variable=var, width=30, checkbox_width=18, checkbox_height=18, fg_color=CLR_ACCENT, hover_color=CLR_ACCENT_DARK, border_color=CLR_BORDER, corner_radius=4).grid(row=0, column=2, padx=(4, 8), pady=4)
+        cb = ctk.CTkCheckBox(row_f, text="", variable=var, width=30, checkbox_width=18, checkbox_height=18, fg_color=CLR_ACCENT, hover_color=CLR_ACCENT_DARK, border_color=CLR_BORDER, corner_radius=4, command=lambda c=class_name, v=var: self._on_class_visibility_change(c, v))
+        cb.grid(row=0, column=2, padx=(4, 8), pady=4)
 
     def _is_class_visible(self, class_name: str) -> bool:
         return self.class_visibility.get(class_name, ctk.BooleanVar(value=True)).get()
@@ -736,21 +839,18 @@ class SecurityApp(ctk.CTk):
             self.class_colors[class_name] = _OBJECT_PALETTE[len(self.class_colors) % len(_OBJECT_PALETTE)]
         return self.class_colors[class_name]
 
-    def _compute_allowed_ids(self) -> Optional[set]:
-        enabled = {n for n, v in self.class_visibility.items() if v.get()}
-        if len(enabled) == len(self.class_visibility): return None
-        ids = set()
-        for name in enabled:
-            cid = self.detector.get_class_id(name)
-            if cid >= 0: ids.add(cid)
-        return ids if ids else None
+    # _compute_allowed_ids removed because filtering is now done post-inference per camera
 
     # ════════════════════════════════════════════════════════
     #  CAMERA LIST MANAGEMENT
     # ════════════════════════════════════════════════════════
 
     def _refresh_camera_list(self):
-        for w in self.camera_list_frame.winfo_children(): w.destroy()
+        if not hasattr(self, '_camera_list_widgets'):
+            self._camera_list_widgets = []
+        for w in self._camera_list_widgets:
+            w.destroy()
+        self._camera_list_widgets.clear()
 
         for src in self.camera_sources:
             if src not in self.active_sources_vars:
@@ -770,6 +870,7 @@ class SecurityApp(ctk.CTk):
             row_f = ctk.CTkFrame(self.camera_list_frame, fg_color=CLR_CAM_SEL if is_sel else CLR_CAM_IDLE, corner_radius=8)
             row_f.pack(fill="x", pady=3, padx=2)
             row_f.grid_columnconfigure(1, weight=1)
+            self._camera_list_widgets.append(row_f)
 
             ctk.CTkLabel(row_f, text=icon, font=ctk.CTkFont(size=14)).grid(row=0, column=0, padx=(8, 4), pady=6)
             
@@ -841,44 +942,26 @@ class SecurityApp(ctk.CTk):
         if not self._video_frames:
             return
 
-        n = len(self._video_frames)
-        cols = 1 if n == 1 else (2 if n <= 4 else (3 if n <= 9 else 4))
-
         if self._zoomed_src == src:
             # Unzoom
             self._zoomed_src = None
-            
-            # Khôi phục weight của grid
-            for idx in range(n):
-                self.video_grid.grid_columnconfigure(idx % cols, weight=1)
-                self.video_grid.grid_rowconfigure(idx // cols, weight=1)
-                
-            # Hiện lại và cấu hình vị trí cũ cho tất cả frame
-            for s, fb in self._video_frames.items():
-                cfg = self._grid_configs[s]
-                fb.grid(row=cfg["row"], column=cfg["column"], padx=4, pady=4, sticky="nsew")
-                fb.configure(border_color=CLR_BORDER, border_width=2)
+            self.zoom_overlay.place_forget()
+            self.zoom_lbl_video.configure(image="") # Xóa cache ảnh để tiết kiệm RAM
             logger.info("🔍 Thu nhỏ camera: hiển thị tất cả grid")
         else:
-            # Zoom logic
+            # Zoom
+            if self._zoomed_src:
+                self._toggle_zoom(self._zoomed_src) # Unzoom camera cũ
+                
             self._zoomed_src = src
+            stream = self.streams.get(src)
+            if stream:
+                self.zoom_lbl_title.configure(text=f"  🔍 Đang phóng to: {stream.display_name} (Click để thu nhỏ)")
             
-            for r in range((n - 1) // cols + 1):
-                self.video_grid.grid_rowconfigure(r, weight=0)
-            for c in range(cols):
-                self.video_grid.grid_columnconfigure(c, weight=0)
-
-            # Cấu hình độc nhất ô top-left
-            self.video_grid.grid_columnconfigure(0, weight=1)
-            self.video_grid.grid_rowconfigure(0, weight=1)
-            
-            for s, fb in self._video_frames.items():
-                if s == src:
-                    fb.grid(row=0, column=0, padx=4, pady=4, sticky="nsew")
-                    fb.configure(border_color=CLR_ACCENT, border_width=3)
-                else:
-                    fb.grid_remove() # Ẩn khỏi grid view
-            logger.info("🔍 Phóng to video")
+            # Che toàn bộ container (gồm header Hệ Thống Màn Hình và video grid)
+            self.zoom_overlay.place(relx=0, rely=0, relwidth=1, relheight=1)
+            self.zoom_overlay.lift()
+            logger.info("🔍 Phóng to video toàn khung hình bằng Overlay")
 
     # ════════════════════════════════════════════════════════
     #  MULTI-CAMERA INFERENCE & RENDER
@@ -893,15 +976,22 @@ class SecurityApp(ctk.CTk):
         # Dọn dẹp trước
         self.stop_all_cameras()
         
-        # Grid clear
-        for widget in self.video_grid.winfo_children():
-            widget.destroy()
         self.video_labels.clear()
         self._record_buttons.clear()
+        # Dùng grid_forget/place_forget thay vì destroy() để tránh CTkFrame after() crash
+        for fb in list(self._video_frames.values()):
+            try:
+                fb.place_forget()
+                fb.grid_forget()
+            except Exception:
+                pass
         self._video_frames.clear()
         self._grid_configs.clear()
         self._zoomed_src = None
+        self.zoom_overlay.place_forget()
+        self.zoom_lbl_video.configure(image="")
         
+
         # Tính toán Layout (Chia lưới tự động)
         n = len(selected)
         cols = 1 if n == 1 else (2 if n <= 4 else (3 if n <= 9 else 4))
@@ -920,8 +1010,15 @@ class SecurityApp(ctk.CTk):
             self.video_grid.grid_columnconfigure(idx % cols, weight=1)
             self.video_grid.grid_rowconfigure(idx // cols, weight=1)
 
-        # Kết nối
         for idx, src in enumerate(selected):
+            # Init config if missing
+            if src not in self.camera_configs:
+                self.camera_configs[src] = {
+                    "fire_conf": Config.FIRE_CONFIDENCE_THRESHOLD,
+                    "def_conf": Config.CONFIDENCE_THRESHOLD,
+                    "class_visibility": {k: v.get() for k, v in self.class_visibility.items()}
+                }
+                
             stream = CameraStream(src)
             if stream.start():
                 self.streams[src] = stream
@@ -968,6 +1065,13 @@ class SecurityApp(ctk.CTk):
             self._set_status("LỖI: Chẳng có camera nào kết nối được", CLR_RED, "🔴")
             return
 
+        # Update Config Target Menu
+        menu_values = ["Tất cả Camera"] + list(self.streams.keys())
+        self.config_target_menu.configure(values=menu_values)
+        if self.config_target_var.get() not in menu_values:
+            self.config_target_var.set("Tất cả Camera")
+            self._on_config_target_change("Tất cả Camera")
+
         self.feed_count_label.configure(text=f"{len(self.streams)} camera đang bật")
         self.btn_start.configure(state="disabled")
         self.btn_pause.configure(state="normal", text="⏸ Tạm Dừng", fg_color=CLR_YELLOW, text_color="black")
@@ -987,8 +1091,6 @@ class SecurityApp(ctk.CTk):
         last_processed_frames = {}
         
         while self.is_inferencing:
-            allowed_ids = self._cached_allowed_ids
-            
             try:
                 active_streams = list(self.streams.items())
             except RuntimeError:
@@ -1009,7 +1111,7 @@ class SecurityApp(ctk.CTk):
                     last_processed_frames[src] = stream.frame_id
                     
             if batch_frames:
-                batch_detections = self.detector.detect_batch(batch_frames, allowed_class_ids=allowed_ids)
+                batch_detections = self.detector.detect_batch(batch_frames, allowed_class_ids=None)
                 
                 for stream, detections in zip(batch_streams, batch_detections):
                     stream.latest_detections = detections
@@ -1033,9 +1135,6 @@ class SecurityApp(ctk.CTk):
         """Logic render thực tế, tách ra để try/except bao bọc."""
         if not self.is_inferencing:
             return
-
-        self._cached_allowed_ids = self._compute_allowed_ids()
-        
         total_obj = 0
         total_fire = 0
         fire_alerted = False
@@ -1059,10 +1158,36 @@ class SecurityApp(ctk.CTk):
             detections = stream.latest_detections
             
             if frame is not None:
-                # Đăng ký class mới
+                # Đăng ký class mới từ nhận diện gốc
                 for det in detections:
                     if det.class_name not in self.class_visibility:
                         self._register_class(det.class_name)
+                        
+                # ── Post-Filtering theo cấu hình của từng camera ──
+                filtered_detections = []
+                cfg = self.camera_configs.get(stream.source)
+                if cfg:
+                    for det in detections:
+                        cls_name = det.class_name
+                        cname_lower = cls_name.lower()
+                        
+                        # 1. Lọc theo visibility (Checkboxes)
+                        if not cfg["class_visibility"].get(cls_name, True):
+                            continue
+                            
+                        # 2. Lọc theo threshold riêng
+                        if cname_lower == Config.FIRE_CLASS_NAME.lower() or cname_lower == Config.SMOKE_CLASS_NAME.lower():
+                            if det.confidence < cfg.get("fire_conf", 0.0):
+                                continue
+                        else:
+                            if det.confidence < cfg.get("def_conf", 0.0):
+                                continue
+                                
+                        filtered_detections.append(det)
+                    detections = filtered_detections
+                
+                # Cập nhật thông số thống kê
+                total_obj += len(detections)
                 
                 if not stream.is_paused:
                     fire_confirmed = stream.tracker.update(detections)
@@ -1111,7 +1236,12 @@ class SecurityApp(ctk.CTk):
                 # Render ra grid label
                 lbl = self.video_labels.get(stream.source)
                 if lbl:
-                    self._display_on_label(display_frame, lbl)
+                    if self._zoomed_src is None:
+                        # Render bình thường trong grid
+                        self._display_on_label(display_frame, lbl)
+                    elif self._zoomed_src == stream.source:
+                        # Chỉ render lên khung Zoom (overlay)
+                        self._display_on_label(display_frame, self.zoom_lbl_video)
 
                 # Thống kê
                 visible = [d for d in detections if self._is_class_visible(d.class_name)]
@@ -1133,7 +1263,20 @@ class SecurityApp(ctk.CTk):
             dead_stream = self.streams[k]
             if dead_stream.has_error:
                 logger.error("❌ Camera [%s] đã ngắt vĩnh viễn: %s", k, dead_stream.error_message)
+                
+            # Cứu lại video đang ghi dở nếu camera đột ngột ngắt hoặc hết video
+            if dead_stream.is_recording and dead_stream.rec_buffer:
+                logger.info("[Record] 🔴 Lưu video sự cố đang ghi dở do camera %s dừng.", dead_stream.display_name)
+                frames_copy = dead_stream.rec_buffer.copy()
+                threading.Thread(target=self._save_event_video, args=(frames_copy, dead_stream.display_name), daemon=True).start()
+                
+            if dead_stream.manual_recording and dead_stream.manual_rec_buffer:
+                frames_copy = dead_stream.manual_rec_buffer.copy()
+                threading.Thread(target=self._save_event_video, args=(frames_copy, f"MANUAL_{dead_stream.display_name}"), daemon=True).start()
+
             del self.streams[k]
+            if self._zoomed_src == k:
+                self._toggle_zoom(k)
 
         if self.is_inferencing and dead_keys:
             self._refresh_camera_list()
@@ -1181,7 +1324,7 @@ class SecurityApp(ctk.CTk):
             self._inference_thread.join(timeout=2.0)
         self._inference_thread = None
 
-        # Dừng manual recording nếu đang ghi
+        # Dừng và lưu lại các video đang ghi dở
         for src, stream in self.streams.items():
             if stream.manual_recording:
                 stream.manual_recording = False
@@ -1193,20 +1336,41 @@ class SecurityApp(ctk.CTk):
                         args=(frames_copy, f"MANUAL_{stream.display_name}"),
                         daemon=True
                     ).start()
+            if stream.is_recording:
+                stream.is_recording = False
+                if stream.rec_buffer:
+                    logger.info("[Record] 🔴 Lưu video sự cố đang ghi dở do hệ thống dừng.")
+                    frames_copy = stream.rec_buffer.copy()
+                    stream.rec_buffer.clear()
+                    threading.Thread(
+                        target=self._save_event_video,
+                        args=(frames_copy, stream.display_name),
+                        daemon=True
+                    ).start()
 
         # Dừng từng luồng
         for stream in self.streams.values():
             stream.stop()
         self.streams.clear()
 
-        # Xóa Grid UI
-        for widget in self.video_grid.winfo_children():
-            widget.destroy()
+        # XọA GRID UI - Dùng grid_forget/place_forget thay vì destroy()
+        # vì CustomTkinter lấy sau() callbacks để check_dpi_scaling/update và
+        # giao destroy() tức thì sẽ khiến những callbacks này crash
+        for fb in list(self._video_frames.values()):
+            try:
+                fb.place_forget()
+                fb.grid_forget()
+            except Exception:
+                pass
         self.video_labels.clear()
         self._record_buttons.clear()
         self._video_frames.clear()
         self._grid_configs.clear()
         self._zoomed_src = None
+        
+        self.zoom_overlay.place_forget()
+        self.zoom_lbl_video.configure(image="")
+        self.zoom_lbl_title.configure(text="🔍 Chế độ phóng to")
 
         self.btn_start.configure(state="normal")
         self.btn_pause.configure(state="disabled", text="⏸ Tạm Dừng", fg_color=CLR_YELLOW, text_color="black")

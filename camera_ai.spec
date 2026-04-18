@@ -55,7 +55,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='CameraAI_v2',
+    name='CameraAI',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -9,3 +9,491 @@
 [2026-04-16 20:22:27] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
 [2026-04-16 20:22:27] [INFO] [__main__] ==================================================
 [2026-04-16 20:22:33] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 19:58:02] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-17 19:58:21] [INFO] [__main__] ==================================================
+[2026-04-17 19:58:21] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 19:58:21 17/04/2026
+[2026-04-17 19:58:21] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-17 19:58:21] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-17 19:58:21] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-17 19:58:21] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-17 19:58:21] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-17 19:58:21] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-17 19:58:21] [INFO] [__main__] ==================================================
+[2026-04-17 19:58:26] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 20:06:36] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-17 20:06:42] [INFO] [__main__] ==================================================
+[2026-04-17 20:06:42] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:06:42 17/04/2026
+[2026-04-17 20:06:42] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-17 20:06:42] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-17 20:06:42] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-17 20:06:42] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-17 20:06:42] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-17 20:06:42] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-17 20:06:42] [INFO] [__main__] ==================================================
+[2026-04-17 20:07:00] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\3.mp4"
+[2026-04-17 20:07:06] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\1.mp4"
+[2026-04-17 20:07:11] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"
+[2026-04-17 20:07:17] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 20:07:17] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-17 20:07:17] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-17 20:07:18] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"
+[2026-04-17 20:07:25] [INFO] [__main__] 🔍 Phóng to video
+[2026-04-17 20:07:26] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-17 20:07:34] [INFO] [__main__] 🔍 Phóng to video
+[2026-04-17 20:07:36] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-17 20:07:39] [INFO] [__main__] 🔴 Bắt đầu ghi hình thủ công ["D:\Downloads\app\1.mp4"]
+[2026-04-17 20:07:41] [INFO] [__main__] ⏹ Dừng ghi hình thủ công ["D:\Downloads\app\1.mp4"] — 118 frames
+[2026-04-17 20:07:41] [INFO] [__main__] ✅ Đã lưu video tại: events\FIRE_MANUAL_"D_Downloads_app_1.mp4"_20260417_200741.mp4 (118 frames)
+[2026-04-17 20:08:36] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-17 20:08:36] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"].
+[2026-04-17 20:08:36] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-17 20:08:37] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-17 20:08:37] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 20:09:23] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 20:09:23] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-17 20:10:09] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 20:10:12] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 20:10:12] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-17 20:10:12] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-17 20:10:37] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\3.mp4"!
+[2026-04-17 20:10:37] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\app\3.mp4"...
+[2026-04-17 20:10:40] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\app\3.mp4"] đã gửi thành công
+[2026-04-17 20:11:04] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-17 21:01:59] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-17 21:02:06] [INFO] [__main__] ==================================================
+[2026-04-17 21:02:06] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 21:02:06 17/04/2026
+[2026-04-17 21:02:06] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-17 21:02:06] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-17 21:02:06] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-17 21:02:06] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-17 21:02:06] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-17 21:02:06] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-17 21:02:06] [INFO] [__main__] ==================================================
+[2026-04-17 21:03:04] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:10:17] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 07:10:26] [INFO] [__main__] ==================================================
+[2026-04-18 07:10:26] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 07:10:26 18/04/2026
+[2026-04-18 07:10:26] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 07:10:26] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 07:10:26] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 07:10:26] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 07:10:26] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 07:10:26] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 07:10:26] [INFO] [__main__] ==================================================
+[2026-04-18 07:10:42] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:10:48] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:10:53] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:11:00] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:11:14] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\1.mp4"
+[2026-04-18 07:11:21] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\3.mp4"
+[2026-04-18 07:11:32] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"
+[2026-04-18 07:11:34] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:11:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:11:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:11:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:11:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:11:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-18 07:11:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-18 07:11:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"
+[2026-04-18 07:11:41] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 07:11:41] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 07:11:42] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-18 07:11:42] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 07:11:42] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 07:11:42] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 07:11:42] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-18 07:11:42] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-18 07:11:42] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"].
+[2026-04-18 07:11:43] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"!
+[2026-04-18 07:11:45] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-18 07:15:32] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 07:15:42] [INFO] [__main__] ==================================================
+[2026-04-18 07:15:42] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 07:15:42 18/04/2026
+[2026-04-18 07:15:42] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 07:15:42] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 07:15:42] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 07:15:42] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 07:15:42] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 07:15:42] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 07:15:42] [INFO] [__main__] ==================================================
+[2026-04-18 07:15:45] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"
+[2026-04-18 07:15:52] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\3.mp4"
+[2026-04-18 07:15:59] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\app\1.mp4"
+[2026-04-18 07:16:14] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:16:22] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:16:28] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:16:36] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:16:38] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:16:38] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"
+[2026-04-18 07:16:38] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-18 07:16:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-18 07:16:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:16:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:16:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:16:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:16:44] [INFO] [__main__] 🔍 Phóng to video
+[2026-04-18 07:16:46] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 07:16:46] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 07:16:46] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:16:47] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"].
+[2026-04-18 07:16:47] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-18 07:16:47] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-18 07:16:47] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-18 07:16:47] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 07:16:47] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 07:16:47] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 07:16:48] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 07:16:48] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:16:49] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-18 07:16:50] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:16:50] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\Video_Cháy_Tế_Bào_Quang_Điện.mp4"
+[2026-04-18 07:16:50] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-18 07:16:50] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-18 07:16:50] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:16:50] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:16:50] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:16:50] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:16:58] [INFO] [__main__] 🔍 Phóng to video
+[2026-04-18 07:17:00] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:17:03] [INFO] [__main__] 🔍 Phóng to video
+[2026-04-18 07:17:04] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:17:06] [INFO] [__main__] 🔍 Phóng to video
+[2026-04-18 07:17:15] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:17:21] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:18:09] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 07:18:14] [INFO] [__main__] ==================================================
+[2026-04-18 07:18:14] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 07:18:14 18/04/2026
+[2026-04-18 07:18:14] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 07:18:14] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 07:18:14] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 07:18:14] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 07:18:14] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 07:18:14] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 07:18:14] [INFO] [__main__] ==================================================
+[2026-04-18 07:18:26] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:20:13] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 07:20:20] [INFO] [__main__] ==================================================
+[2026-04-18 07:20:20] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 07:20:20 18/04/2026
+[2026-04-18 07:20:20] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 07:20:20] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 07:20:20] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 07:20:20] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 07:20:20] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 07:20:20] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 07:20:20] [INFO] [__main__] ==================================================
+[2026-04-18 07:20:24] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:20:32] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:20:35] [WARNING] [__main__] Camera đã tồn tại hoặc bỏ trống!
+[2026-04-18 07:20:37] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:20:39] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:20:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:20:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:20:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:20:50] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:20:51] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:20:52] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 07:20:52] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 07:20:53] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 07:20:53] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 07:20:53] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 07:20:54] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 07:20:54] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:20:55] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:20:56] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 07:20:56] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:20:56] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:20:56] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-18 07:21:02] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 07:21:02] [INFO] [telegram_notifier] Cooldown cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] còn 53.6s, bỏ qua.
+[2026-04-18 07:21:02] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 07:21:04] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 07:21:04] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 07:21:04] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 07:23:51] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 07:23:58] [INFO] [__main__] ==================================================
+[2026-04-18 07:23:58] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 07:23:58 18/04/2026
+[2026-04-18 07:23:58] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 07:23:58] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 07:23:58] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 07:23:58] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 07:23:58] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 07:23:58] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 07:23:58] [INFO] [__main__] ==================================================
+[2026-04-18 07:24:03] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:24:14] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:24:21] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:24:23] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:24:23] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:24:23] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:24:23] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:24:25] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:24:27] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:24:29] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:24:30] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 07:24:30] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 07:24:30] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:24:31] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 07:24:31] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:24:31] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-18 07:24:31] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 07:24:32] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 07:24:32] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:24:33] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-18 07:24:39] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:24:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:24:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 07:24:39] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:24:45] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:25:08] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:25:17] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 07:25:22] [INFO] [__main__] ==================================================
+[2026-04-18 07:25:22] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 07:25:22 18/04/2026
+[2026-04-18 07:25:22] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 07:25:22] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 07:25:22] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 07:25:22] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 07:25:22] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 07:25:22] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 07:25:22] [INFO] [__main__] ==================================================
+[2026-04-18 07:25:26] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:25:35] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:25:36] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:25:37] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 07:25:37] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 07:25:39] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:25:40] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:25:41] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:25:41] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:25:42] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:25:43] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:25:43] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:25:44] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:25:45] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:25:46] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:25:47] [INFO] [__main__] 🔴 Bắt đầu ghi hình thủ công ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-18 07:25:49] [INFO] [__main__] ⏹ Dừng ghi hình thủ công ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] — 26 frames
+[2026-04-18 07:25:49] [INFO] [__main__] ✅ Đã lưu video tại: events\FIRE_MANUAL_"D_Downloads_Tạo_Video_Lửa_Cháy.mp4"_20260418_072549.mp4 (26 frames)
+[2026-04-18 07:25:59] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:00] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:01] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:01] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:02] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:03] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:03] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:04] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:06] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:07] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:08] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:08] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:09] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:10] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:11] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 07:26:11] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 07:26:11] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:12] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 07:26:12] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 07:26:12] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 07:26:13] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 07:26:13] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 07:26:13] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 07:26:14] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-18 07:26:28] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 09:03:45] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 09:04:13] [INFO] [__main__] ==================================================
+[2026-04-18 09:04:13] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 09:04:13 18/04/2026
+[2026-04-18 09:04:13] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 09:04:13] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 09:04:13] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 09:04:13] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 09:04:13] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 09:04:13] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 09:04:13] [INFO] [__main__] ==================================================
+[2026-04-18 09:04:46] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 09:04:53] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 09:05:00] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 09:05:06] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 09:05:08] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 09:05:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 09:05:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 09:05:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 09:05:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 09:05:11] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 09:05:12] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 09:05:13] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 09:05:14] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 09:05:14] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 09:05:14] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 09:05:14] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 09:05:15] [ERROR] [telegram_notifier] Lỗi kết nối. Kiểm tra internet.
+[2026-04-18 09:05:15] [ERROR] [telegram_notifier] ❌ Gửi Telegram thất bại.
+[2026-04-18 09:05:16] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-18 09:05:16] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 09:05:16] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 09:05:16] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 09:05:16] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 09:05:16] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 09:05:22] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 09:05:22] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 09:05:22] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 09:05:22] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 09:05:22] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 09:05:25] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 09:05:29] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 19:49:59] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 19:50:04] [INFO] [__main__] ==================================================
+[2026-04-18 19:50:04] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 19:50:04 18/04/2026
+[2026-04-18 19:50:04] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 19:50:04] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 19:50:04] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 19:50:04] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 19:50:04] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 19:50:04] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 19:50:04] [INFO] [__main__] ==================================================
+[2026-04-18 19:50:14] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:15:41] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 20:15:56] [INFO] [__main__] ==================================================
+[2026-04-18 20:15:56] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:15:56 18/04/2026
+[2026-04-18 20:15:56] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 20:15:56] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 20:15:56] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 20:15:56] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 20:15:56] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 20:15:56] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 20:15:56] [INFO] [__main__] ==================================================
+[2026-04-18 20:17:26] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 20:17:27] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:17:29] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:17:29] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 20:17:29] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:17:31] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:17:37] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-18 20:17:37] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:17:37] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 20:17:37] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:17:45] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:17:45] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 20:17:45] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:17:48] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:17:50] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:28:41] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 20:28:46] [INFO] [__main__] ==================================================
+[2026-04-18 20:28:46] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:28:46 18/04/2026
+[2026-04-18 20:28:46] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 20:28:46] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 20:28:46] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 20:28:46] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 20:28:46] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 20:28:46] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 20:28:46] [INFO] [__main__] ==================================================
+[2026-04-18 20:28:55] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 20:29:01] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:29:02] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:29:02] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-18 20:29:02] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:29:04] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:29:10] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-18 20:29:10] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:29:10] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 20:31:45] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 20:31:52] [INFO] [__main__] ==================================================
+[2026-04-18 20:31:52] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:31:52 18/04/2026
+[2026-04-18 20:31:52] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 20:31:52] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 20:31:52] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 20:31:52] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 20:31:52] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 20:31:52] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 20:31:52] [INFO] [__main__] ==================================================
+[2026-04-18 20:31:54] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:31:56] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:31:56] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:31:58] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:32:04] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:32:04] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 20:32:04] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 20:32:04] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:32:08] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:32:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:32:10] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:32:16] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 20:32:16] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:32:17] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 20:32:17] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:32:28] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 20:32:29] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:32:29] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:32:29] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 20:32:31] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:32:36] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 20:32:36] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 20:32:37] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:32:38] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 20:32:38] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 20:32:38] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 20:32:38] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:32:39] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-18 20:32:42] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:32:42] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:32:42] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 20:32:44] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:32:49] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 20:32:49] [INFO] [telegram_notifier] Cooldown cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] còn 50.5s, bỏ qua.
+[2026-04-18 20:32:49] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 20:32:50] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:32:51] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 20:36:16] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 20:36:21] [INFO] [__main__] ==================================================
+[2026-04-18 20:36:21] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:36:21 18/04/2026
+[2026-04-18 20:36:21] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 20:36:21] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 20:36:21] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 20:36:21] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 20:36:21] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 20:36:21] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 20:36:21] [INFO] [__main__] ==================================================
+[2026-04-18 20:36:23] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 20:36:32] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 20:36:33] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:36:33] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-18 20:36:33] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 20:36:35] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:36:40] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-18 20:36:40] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"...
+[2026-04-18 20:36:41] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-18 20:36:41] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 20:36:41] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 20:36:43] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-18 20:39:50] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-18 20:39:55] [INFO] [__main__] ==================================================
+[2026-04-18 20:39:55] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:39:55 18/04/2026
+[2026-04-18 20:39:55] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-18 20:39:55] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-18 20:39:55] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-18 20:39:55] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-18 20:39:55] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-18 20:39:55] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-18 20:39:55] [INFO] [__main__] ==================================================
+[2026-04-18 20:39:57] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 20:40:05] [INFO] [__main__] ➕ Đã thêm camera: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:40:06] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:40:07] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 20:40:07] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:40:08] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:40:15] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 20:40:15] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:40:15] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 20:40:15] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 20:40:15] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:40:19] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:40:19] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 20:40:19] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:40:21] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-18 20:40:27] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"].
+[2026-04-18 20:40:27] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-18 20:40:28] [INFO] [__main__] 🔍 Thu nhỏ camera: hiển thị tất cả grid
+[2026-04-18 20:40:28] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-18 20:40:28] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:40:31] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-18 20:40:31] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Yêu_cầu_tạo_video_theo_mô_tả.mp4"
+[2026-04-18 20:40:31] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-18 20:40:33] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
