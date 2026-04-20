@@ -7,6 +7,9 @@ import os
 import sys
 import threading
 import time
+import json
+import queue
+import unicodedata
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from typing import Optional, Dict
@@ -14,7 +17,7 @@ from typing import Optional, Dict
 import cv2
 import customtkinter as ctk
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageTk
 
 from config import Config
 from logger_config import setup_logging
@@ -72,34 +75,27 @@ _OBJECT_PALETTE = [
 
 
 class _TextboxHandler(logging.Handler):
-    def __init__(self, textbox: ctk.CTkTextbox):
+    def __init__(self, message_queue: "queue.SimpleQueue[str]"):
         super().__init__()
-        self.textbox = textbox
+        self.message_queue = message_queue
 
     def emit(self, record: logging.LogRecord):
-        msg = self.format(record) + "\n"
-        def _append():
-            try:
-                self.textbox.insert("end", msg)
-                self.textbox.see("end")
-            except Exception:
-                pass  # Handler KHÔNG ĐƯỢC throw — widget có thể đã bị destroy
-        # Phải dùng after() để đưa lệnh update UI về main thread, tránh crash/garble log
-        self.textbox.after(0, _append)
+        try:
+            self.message_queue.put_nowait(self.format(record) + "\n")
+        except Exception:
+            pass
 
 class _StdoutRedirect:
-    def __init__(self, textbox: ctk.CTkTextbox):
-        self.textbox = textbox
+    def __init__(self, message_queue: "queue.SimpleQueue[str]"):
+        self.message_queue = message_queue
 
     def write(self, s: str):
-        if not s.strip(): return
-        def _append():
-            try:
-                self.textbox.insert("end", s)
-                self.textbox.see("end")
-            except Exception:
-                pass  # Widget có thể đã bị destroy khi app đang tắt
-        self.textbox.after(0, _append)
+        if not s.strip():
+            return
+        try:
+            self.message_queue.put_nowait(s)
+        except Exception:
+            pass
 
     def flush(self): pass
 
@@ -260,6 +256,8 @@ class CameraStream:
         self.frame_id = 0
         self.is_video_file = False
         self.is_paused = False
+        self.ended = False
+        self.capture_backend = "unknown"
         
         # Ring Buffer & Event Recording
         import collections
@@ -277,16 +275,57 @@ class CameraStream:
         self.has_error = False
         self.error_message = ""
 
+    def _is_local_video_source(self, src_val) -> bool:
+        return isinstance(src_val, str) and not src_val.startswith(("http://", "https://", "rtsp://"))
+
+    def _backend_label(self, cap, fallback: str) -> str:
+        try:
+            backend_name = cap.getBackendName()
+            if backend_name:
+                return backend_name
+        except Exception:
+            pass
+        return fallback
+
+    def _open_capture(self, src_val):
+        self.is_video_file = self._is_local_video_source(src_val)
+
+        attempts = []
+        if self.is_video_file and os.name == "nt":
+            ffmpeg_backend = getattr(cv2, "CAP_FFMPEG", None)
+            if ffmpeg_backend is not None:
+                attempts.append((ffmpeg_backend, "FFMPEG"))
+        attempts.append((None, "DEFAULT"))
+
+        for backend_id, backend_label in attempts:
+            try:
+                cap = cv2.VideoCapture(src_val) if backend_id is None else cv2.VideoCapture(src_val, backend_id)
+            except Exception as exc:
+                logger.warning("⚠️ Không thể khởi tạo backend %s cho [%s]: %s", backend_label, self.source, exc)
+                continue
+
+            if cap is not None and cap.isOpened():
+                self.capture_backend = self._backend_label(cap, backend_label)
+                logger.info("🎞️ Nguồn [%s] đang dùng backend: %s", self.source, self.capture_backend)
+                return cap
+
+            try:
+                if cap is not None:
+                    cap.release()
+            except Exception:
+                pass
+
+        self.capture_backend = "unopened"
+        return None
+
     def start(self):
         src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
-        self.cap = cv2.VideoCapture(src_val)
-        if not self.cap.isOpened():
+        self.cap = self._open_capture(src_val)
+        if self.cap is None:
             logger.error("Không thể mở nguồn: %s", self.source)
             self.cap = None
             return False
 
-        self.is_video_file = isinstance(src_val, str) and not src_val.startswith(("http://", "https://", "rtsp://"))
-        
         self.video_fps = RECORD_FPS
         if self.is_video_file:
             fps = self.cap.get(cv2.CAP_PROP_FPS)
@@ -301,6 +340,7 @@ class CameraStream:
         self.reconnect_count = 0
         self.has_error = False
         self.error_message = ""
+        self.ended = False
         self.tracker.reset()
         self.thread = threading.Thread(target=self._capture_loop, daemon=True)
         self.thread.start()
@@ -320,6 +360,7 @@ class CameraStream:
             if not ret:
                 if self.is_video_file:
                     logger.info("🎬 Phát hết video [%s].", self.source)
+                    self.ended = True
                     self.is_running = False
                     break
 
@@ -339,7 +380,7 @@ class CameraStream:
                 if self.cap:
                     self.cap.release()
                 src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
-                self.cap = cv2.VideoCapture(src_val)
+                self.cap = self._open_capture(src_val)
                 continue
 
             # Reset error state khi đọc frame thành công
@@ -348,6 +389,13 @@ class CameraStream:
                 self.error_message = ""
                 self.reconnect_count = 0
                 logger.info("✅ [%s] Kết nối lại thành công!", self.source)
+
+            # Giới hạn kích thước frame để tránh tràn RAM (OOM)
+            h, w = frame.shape[:2]
+            MAX_W = 1280
+            if w > MAX_W:
+                scale = MAX_W / w
+                frame = cv2.resize(frame, (MAX_W, int(h * scale)))
 
             self.latest_frame = frame
             self.frame_id += 1
@@ -377,6 +425,7 @@ class CameraStream:
         if self.cap:
             self.cap.release()
             self.cap = None
+        self.thread = None
 
 
 class SecurityApp(ctk.CTk):
@@ -401,6 +450,18 @@ class SecurityApp(ctk.CTk):
 
         # ── State ──
         self.camera_sources = [str(Config.CAMERA_INDEX)]
+        # Load from history
+        self._history_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "camera_history.json")
+        if os.path.exists(self._history_file):
+            try:
+                with open(self._history_file, 'r', encoding='utf-8') as f:
+                    saved_sources = json.load(f)
+                    for src in saved_sources:
+                        if src not in self.camera_sources:
+                            self.camera_sources.append(src)
+            except Exception as e:
+                logger.warning(f"Không thể tải lịch sử camera: {e}")
+                
         self.active_sources_vars: Dict[str, ctk.BooleanVar] = {}
 
         self.streams: Dict[str, CameraStream] = {}
@@ -410,6 +471,9 @@ class SecurityApp(ctk.CTk):
         self._video_frames: Dict[str, ctk.CTkFrame] = {}
         self._grid_configs: Dict[str, dict] = {}
         self._zoomed_src: Optional[str] = None
+        self._retained_video_caps: list = []
+        self._last_zoom_image = None  # Giữ reference CTkImage tránh GC sớm gây check_dpi_scaling crash
+        self._ui_log_queue: "queue.SimpleQueue[str]" = queue.SimpleQueue()
 
         self.class_colors: dict = {}
         self.class_visibility: dict = {}
@@ -444,13 +508,14 @@ class SecurityApp(ctk.CTk):
 
         # Gắn Handler giao diện để xem log trên app (tạo Log Box)
         # Các stream Logging chuẩn đã được xử lý bởi setup_logging gốc
-        handler = _TextboxHandler(self.log_textbox)
+        handler = _TextboxHandler(self._ui_log_queue)
         handler.setFormatter(logging.Formatter("[%(asctime)s] %(message)s", "%H:%M:%S"))
         logging.getLogger().addHandler(handler)
         
         # Vẫn dùng để catch sys.stdout/stderr lên UI
-        sys.stdout = _StdoutRedirect(self.log_textbox)
-        sys.stderr = _StdoutRedirect(self.log_textbox)
+        sys.stdout = _StdoutRedirect(self._ui_log_queue)
+        sys.stderr = _StdoutRedirect(self._ui_log_queue)
+        self.after(100, self._drain_log_queue)
 
         logger.info("=" * 50)
         logger.info("🔐 Đăng nhập thành công: %s @ %s", LOGIN_USERNAME, datetime.now().strftime("%H:%M:%S %d/%m/%Y"))
@@ -634,6 +699,25 @@ class SecurityApp(ctk.CTk):
         self.zoom_lbl_video = ctk.CTkLabel(self.zoom_overlay, text="")
         self.zoom_lbl_video.grid(row=1, column=0, sticky="nsew")
         self.zoom_lbl_video.bind("<Button-1>", lambda e: self._toggle_zoom(self._zoomed_src) if self._zoomed_src else None)
+
+    def _drain_log_queue(self):
+        try:
+            processed = 0
+            while processed < 200:
+                msg = self._ui_log_queue.get_nowait()
+                self.log_textbox.insert("end", msg)
+                self.log_textbox.see("end")
+                processed += 1
+        except queue.Empty:
+            pass
+        except Exception:
+            pass
+
+        try:
+            if self.winfo_exists():
+                self.after(100, self._drain_log_queue)
+        except Exception:
+            pass
 
     def _build_right_panel(self):
         panel = ctk.CTkFrame(self, fg_color=CLR_PANEL, width=256, corner_radius=12)
@@ -885,6 +969,28 @@ class SecurityApp(ctk.CTk):
                 elif stream.is_running:
                     ctk.CTkLabel(row_f, text="● LIVE", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_GREEN).grid(row=0, column=2, padx=(4, 8), pady=6)
 
+            # Nút xóa
+            btn_del = ctk.CTkButton(row_f, text="❌", width=24, height=24, fg_color="transparent", hover_color=CLR_RED, 
+                                    text_color=CLR_TEXT_DIM, font=ctk.CTkFont(size=10),
+                                    command=lambda s=src: self._remove_camera(s))
+            btn_del.grid(row=0, column=3, padx=(0, 6), pady=6)
+
+    def _remove_camera(self, src: str):
+        if src in self.camera_sources:
+            self.camera_sources.remove(src)
+            if src in self.active_sources_vars:
+                del self.active_sources_vars[src]
+            
+            # Xóa khỏi history
+            try:
+                with open(self._history_file, 'w', encoding='utf-8') as f:
+                    json.dump(self.camera_sources, f, ensure_ascii=False, indent=4)
+            except Exception as e:
+                logger.error(f"Lỗi khi lưu lịch sử camera: {e}")
+                
+            self._refresh_camera_list()
+            logger.info("❌ Đã xóa camera: %s", src)
+
     def _add_camera(self):
         src = self.add_cam_entry.get().strip()
         if src and src not in self.camera_sources:
@@ -893,6 +999,13 @@ class SecurityApp(ctk.CTk):
             self._refresh_camera_list()
             self.add_cam_entry.delete(0, "end")
             logger.info("➕ Đã thêm camera: %s", src)
+            
+            # Save to history
+            try:
+                with open(self._history_file, 'w', encoding='utf-8') as f:
+                    json.dump(self.camera_sources, f, ensure_ascii=False, indent=4)
+            except Exception as e:
+                logger.error(f"Lỗi khi lưu lịch sử camera: {e}")
         else:
             logger.warning("Camera đã tồn tại hoặc bỏ trống!")
 
@@ -938,16 +1051,29 @@ class SecurityApp(ctk.CTk):
     #  ZOOM CAMERA
     # ════════════════════════════════════════════════════════
 
+    def _clear_zoom_overlay(self, reason: str = ""):
+        """Ẩn overlay phóng to an toàn."""
+        self._zoomed_src = None
+        try:
+            self.zoom_overlay.place_forget()
+            self.zoom_lbl_title.configure(text="🔍 Chế độ phóng to")
+            # KHÔNG XÓA image hay reference ở đây để tránh Tkinter Tcl Access Violation
+            # khi render loop đang vẽ dở. place_forget là đủ để ẩn.
+        except Exception:
+            pass
+        if reason:
+            logger.info("🔍 Thu nhỏ zoom: %s", reason)
+
     def _toggle_zoom(self, src: str):
-        if not self._video_frames:
+        if not self._video_frames or src not in self.streams:
+            return
+        stream = self.streams.get(src)
+        if stream and stream.ended:
             return
 
         if self._zoomed_src == src:
             # Unzoom
-            self._zoomed_src = None
-            self.zoom_overlay.place_forget()
-            self.zoom_lbl_video.configure(image="") # Xóa cache ảnh để tiết kiệm RAM
-            logger.info("🔍 Thu nhỏ camera: hiển thị tất cả grid")
+            self._clear_zoom_overlay("người dùng thu nhỏ")
         else:
             # Zoom
             if self._zoomed_src:
@@ -967,6 +1093,44 @@ class SecurityApp(ctk.CTk):
     #  MULTI-CAMERA INFERENCE & RENDER
     # ════════════════════════════════════════════════════════
 
+    def _should_defer_capture_release(self, stream: CameraStream) -> bool:
+        if os.name != "nt" or not stream.is_video_file:
+            return False
+        backend_name = (getattr(stream, "capture_backend", "") or "").upper()
+        return "FFMPEG" not in backend_name
+
+    def _retain_capture_for_process_exit(self, cap, stream: CameraStream):
+        if cap is None:
+            return
+        self._retained_video_caps.append(cap)
+        logger.warning(
+            "âš ï¸ Táº¡m giá»¯ handle video [%s] Ä‘áº¿n lÃºc app thoÃ¡t Ä‘á»ƒ trÃ¡nh treo cap.release() (backend=%s).",
+            stream.display_name,
+            getattr(stream, "capture_backend", "unknown"),
+        )
+
+    def _shutdown_stream_capture(self, stream: CameraStream):
+        capture_thread = stream.thread
+        if capture_thread and capture_thread.is_alive() and capture_thread is not threading.current_thread():
+            logger.info("[DIAG-BG] â± Chá» capture thread thoÃ¡t [%s]...", stream.display_name)
+            capture_thread.join(timeout=2.0)
+            logger.info("[DIAG-BG] â± Capture thread alive=%s [%s]", capture_thread.is_alive(), stream.display_name)
+
+        cap = stream.cap
+        stream.cap = None
+        stream.thread = None
+
+        if cap is None:
+            return
+
+        if self._should_defer_capture_release(stream):
+            self._retain_capture_for_process_exit(cap, stream)
+            return
+
+        logger.info("[DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... [%s]", stream.display_name)
+        cap.release()
+        logger.info("[DIAG-BG] â± cap.release() OK [%s]", stream.display_name)
+
     def start_cameras(self):
         selected = [src for src, var in self.active_sources_vars.items() if var.get()]
         if not selected:
@@ -978,19 +1142,14 @@ class SecurityApp(ctk.CTk):
         
         self.video_labels.clear()
         self._record_buttons.clear()
-        # Dùng grid_forget/place_forget thay vì destroy() để tránh CTkFrame after() crash
         for fb in list(self._video_frames.values()):
             try:
-                fb.place_forget()
-                fb.grid_forget()
+                fb.destroy()
             except Exception:
                 pass
         self._video_frames.clear()
         self._grid_configs.clear()
-        self._zoomed_src = None
-        self.zoom_overlay.place_forget()
-        self.zoom_lbl_video.configure(image="")
-        
+        self._clear_zoom_overlay()
 
         # Tính toán Layout (Chia lưới tự động)
         n = len(selected)
@@ -1211,7 +1370,7 @@ class SecurityApp(ctk.CTk):
                         stream.is_recording = True
                         stream.record_frames_left = RECORD_FUTURE_FRAMES
                         stream.rec_buffer = list(stream.frame_buffer)
-                        logger.info("[Record] 🔴 Bắt đầu ghi hình sự cố cho %s...", stream.display_name)
+                        logger.info("[Record] 🔴 Bắt đầu ghi hình sự cố cho %s (%d frames buffer)...", stream.display_name, len(stream.rec_buffer))
 
                 # Ghi luồng Video tương lai (event recording)
                 if stream.is_recording and not stream.is_paused:
@@ -1221,11 +1380,13 @@ class SecurityApp(ctk.CTk):
                     if stream.record_frames_left <= 0:
                         stream.is_recording = False
                         stream.record_cooldown = time.time() + Config.ALERT_COOLDOWN_SECONDS
-                        frames_copy = stream.rec_buffer.copy()
-                        stream.rec_buffer.clear()
+                        logger.info("[DIAG] ⏱ Bắt đầu copy rec_buffer (%d frames)...", len(stream.rec_buffer))
+                        frames_ref = stream.rec_buffer  # Chỉ chuyển reference, KHÔNG copy
+                        stream.rec_buffer = []           # Gán list mới cho stream
+                        logger.info("[DIAG] ⏱ Đã chuyển rec_buffer sang thread lưu video")
                         threading.Thread(
                             target=self._save_event_video,
-                            args=(frames_copy, stream.display_name),
+                            args=(frames_ref, stream.display_name),
                             daemon=True
                         ).start()
 
@@ -1259,30 +1420,62 @@ class SecurityApp(ctk.CTk):
 
         # Dọn dẹp các stream đã chết
         dead_keys = [k for k, v in self.streams.items() if not v.is_running]
+        if dead_keys:
+            logger.info("[DIAG] 🔍 Phát hiện %d stream chết: %s", len(dead_keys), dead_keys)
         for k in dead_keys:
             dead_stream = self.streams[k]
+            logger.info("[DIAG] 🔍 Cleanup stream [%s] — is_recording=%s, rec_buffer=%d, manual_rec=%s",
+                        k, dead_stream.is_recording,
+                        len(getattr(dead_stream, 'rec_buffer', []) or []),
+                        dead_stream.manual_recording)
             if dead_stream.has_error:
                 logger.error("❌ Camera [%s] đã ngắt vĩnh viễn: %s", k, dead_stream.error_message)
-                
-            # Cứu lại video đang ghi dở nếu camera đột ngột ngắt hoặc hết video
-            if dead_stream.is_recording and dead_stream.rec_buffer:
-                logger.info("[Record] 🔴 Lưu video sự cố đang ghi dở do camera %s dừng.", dead_stream.display_name)
-                frames_copy = dead_stream.rec_buffer.copy()
-                threading.Thread(target=self._save_event_video, args=(frames_copy, dead_stream.display_name), daemon=True).start()
-                
-            if dead_stream.manual_recording and dead_stream.manual_rec_buffer:
-                frames_copy = dead_stream.manual_rec_buffer.copy()
-                threading.Thread(target=self._save_event_video, args=(frames_copy, f"MANUAL_{dead_stream.display_name}"), daemon=True).start()
 
-            del self.streams[k]
+            # Tự động thu nhỏ zoom khi camera kết thúc
             if self._zoomed_src == k:
-                self._toggle_zoom(k)
+                logger.info("[DIAG] 🔍 Thu nhỏ zoom overlay...")
+                self._clear_zoom_overlay(f"video [{k}] đã kết thúc — tự động thu nhỏ")
+                logger.info("[DIAG] 🔍 Đã thu nhỏ zoom overlay OK")
+
+            # Chuyển TOÀN BỘ tác vụ nặng sang background thread
+            def _cleanup_dead_stream(s, display_name):
+                try:
+                    s.is_running = False
+                    if s.is_recording and hasattr(s, 'rec_buffer') and s.rec_buffer:
+                        logger.info("[DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (%d frames) cho %s", len(s.rec_buffer), display_name)
+                        self._save_event_video(s.rec_buffer, display_name)
+                        s.is_recording = False
+                        s.rec_buffer = []
+                        logger.info("[DIAG-BG] ⏱ Đã lưu rec_buffer OK")
+
+                    if s.manual_recording and s.manual_rec_buffer:
+                        logger.info("[DIAG-BG] ⏱ Bắt đầu lưu manual_rec_buffer...")
+                        self._save_event_video(s.manual_rec_buffer, f"MANUAL_{display_name}")
+                        s.manual_recording = False
+                        s.manual_rec_buffer = []
+                        logger.info("[DIAG-BG] ⏱ Đã lưu manual_rec_buffer OK")
+
+                    logger.info("[DIAG-BG] ⏱ Bắt đầu cap.release()...")
+                    self._shutdown_stream_capture(s)
+                    logger.info("[DIAG-BG] ⏱ cap.release() OK")
+                except Exception as e:
+                    logger.error("❌ Lỗi cleanup stream %s: %s", display_name, e, exc_info=True)
+
+            threading.Thread(
+                target=_cleanup_dead_stream,
+                args=(dead_stream, dead_stream.display_name),
+                daemon=True
+            ).start()
+            del self.streams[k]
+            logger.info("[DIAG] 🔍 Đã del stream [%s] khỏi dict — main thread không bị block", k)
 
         if self.is_inferencing and dead_keys:
+            logger.info("[DIAG] 🔍 Bắt đầu _refresh_camera_list...")
             self._refresh_camera_list()
+            logger.info("[DIAG] 🔍 _refresh_camera_list OK")
         if self.is_inferencing and not self.streams:
             logger.info("⌛ Tất cả camera đã ngắt, dừng hệ thống.")
-            self.stop_all_cameras()
+            self.after(0, self.stop_all_cameras)
 
     def _display_on_label(self, frame: np.ndarray, lbl: ctk.CTkLabel):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -1296,9 +1489,12 @@ class SecurityApp(ctk.CTk):
             nw, nh = int(iw * scale), int(ih * scale)
             rgb = cv2.resize(rgb, (nw, nh), interpolation=cv2.INTER_LINEAR)
             pil = Image.fromarray(rgb)
-            ctk_img = ctk.CTkImage(light_image=pil, dark_image=pil, size=(nw, nh))
-            lbl.configure(image=ctk_img, text="")
-            lbl.image = ctk_img
+            tk_img = ImageTk.PhotoImage(image=pil)
+            lbl.configure(image=tk_img, text="")
+            lbl.image = tk_img
+            # Giữ reference để tránh GC sớm
+            if lbl is self.zoom_lbl_video:
+                self._last_zoom_image = tk_img
 
     def _update_global_stats(self, n_obj, n_fire, fire_alerted, active_streams):
         self.stat_cam.configure(text=str(len(active_streams)))
@@ -1316,61 +1512,59 @@ class SecurityApp(ctk.CTk):
             self._set_status("ĐANG THEO DÕI", CLR_GREEN, "🟢")
 
     def stop_all_cameras(self):
+        # Guard: tránh gọi trùng từ nhiều nguồn (render loop + user click)
+        if getattr(self, '_is_stopping', False):
+            return
+        self._is_stopping = True
+        
         logger.info("⏹  Đang dừng toàn bộ camera...")
         self.is_inferencing = False
-        
-        # Chờ inference thread tắt
-        if self._inference_thread and self._inference_thread.is_alive():
-            self._inference_thread.join(timeout=2.0)
+
+        # KHÔNG dùng thread.join() trên main thread — sẽ block Tkinter event loop và gây treo UI.
+        old_thread = self._inference_thread
         self._inference_thread = None
 
-        # Dừng và lưu lại các video đang ghi dở
-        for src, stream in self.streams.items():
-            if stream.manual_recording:
-                stream.manual_recording = False
-                if stream.manual_rec_buffer:
-                    frames_copy = stream.manual_rec_buffer.copy()
-                    stream.manual_rec_buffer.clear()
-                    threading.Thread(
-                        target=self._save_event_video,
-                        args=(frames_copy, f"MANUAL_{stream.display_name}"),
-                        daemon=True
-                    ).start()
-            if stream.is_recording:
-                stream.is_recording = False
-                if stream.rec_buffer:
-                    logger.info("[Record] 🔴 Lưu video sự cố đang ghi dở do hệ thống dừng.")
-                    frames_copy = stream.rec_buffer.copy()
-                    stream.rec_buffer.clear()
-                    threading.Thread(
-                        target=self._save_event_video,
-                        args=(frames_copy, stream.display_name),
-                        daemon=True
-                    ).start()
-
-        # Dừng từng luồng
-        for stream in self.streams.values():
-            stream.stop()
+        # Chuyển TOÀN BỘ tác vụ nặng sang background thread:
+        # - copy rec_buffer (hàng trăm MB)
+        # - save event video (ghi file disk)
+        # - cap.release() + thread.join()
+        streams_to_stop = list(self.streams.values())
         self.streams.clear()
+        
+        def _stop_all_bg(streams, old_t):
+            for s in streams:
+                try:
+                    # Lưu video sự cố đang ghi dở
+                    if s.manual_recording and s.manual_rec_buffer:
+                        s.manual_recording = False
+                        self._save_event_video(s.manual_rec_buffer, f"MANUAL_{s.display_name}")
+                        s.manual_rec_buffer = []
+                    if s.is_recording and hasattr(s, 'rec_buffer') and s.rec_buffer:
+                        s.is_recording = False
+                        logger.info("[Record] 🔴 Lưu video sự cố đang ghi dở do hệ thống dừng.")
+                        self._save_event_video(s.rec_buffer, s.display_name)
+                        s.rec_buffer = []
+                    # Release OpenCV capture
+                    s.is_running = False
+                    self._shutdown_stream_capture(s)
+                except Exception:
+                    pass
+            if old_t and old_t.is_alive():
+                old_t.join(timeout=3.0)
+        threading.Thread(target=_stop_all_bg, args=(streams_to_stop, old_thread), daemon=True).start()
 
-        # XọA GRID UI - Dùng grid_forget/place_forget thay vì destroy()
-        # vì CustomTkinter lấy sau() callbacks để check_dpi_scaling/update và
-        # giao destroy() tức thì sẽ khiến những callbacks này crash
+        # Xóa hoàn toàn GRID UI thay vì ẩn
+        # (Lỗi check_dpi_scaling trước đây là do CTkImage, nay đổi sang ImageTk nên destroy() an toàn)
         for fb in list(self._video_frames.values()):
             try:
-                fb.place_forget()
-                fb.grid_forget()
+                fb.destroy()
             except Exception:
                 pass
         self.video_labels.clear()
         self._record_buttons.clear()
         self._video_frames.clear()
         self._grid_configs.clear()
-        self._zoomed_src = None
-        
-        self.zoom_overlay.place_forget()
-        self.zoom_lbl_video.configure(image="")
-        self.zoom_lbl_title.configure(text="🔍 Chế độ phóng to")
+        self._clear_zoom_overlay()
 
         self.btn_start.configure(state="normal")
         self.btn_pause.configure(state="disabled", text="⏸ Tạm Dừng", fg_color=CLR_YELLOW, text_color="black")
@@ -1387,6 +1581,7 @@ class SecurityApp(ctk.CTk):
         self.stat_state.configure(text="—", text_color=CLR_TEXT_DIM)
         
         self._refresh_camera_list()
+        self._is_stopping = False
 
     def toggle_pause(self):
         if not self.streams:
@@ -1482,24 +1677,46 @@ class SecurityApp(ctk.CTk):
     def _save_event_video(self, frames: list, source_name: str):
         if not frames: return
         try:
+            logger.info("[DIAG-SAVE] ⏱ Bắt đầu _save_event_video: %s (%d frames)", source_name, len(frames))
             event_dir = getattr(Config, "EVENT_DIR", "events")
             if not os.path.exists(event_dir):
                 os.makedirs(event_dir)
                 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            safe_name = source_name.replace(":", "").replace("/", "_").replace("\\", "_")
-            filepath = os.path.join(event_dir, f"FIRE_{safe_name}_{timestamp}.mp4")
+            safe_name = unicodedata.normalize('NFKD', source_name).encode('ascii', 'ignore').decode('ascii')
+            safe_name = "".join([c if c.isalnum() else "_" for c in safe_name])
+            safe_name = safe_name.replace("__", "_").strip("_")
+            
+            filepath = os.path.join(event_dir, f"FIRE_{safe_name}_{timestamp}.avi")
             
             h, w = frames[0].shape[:2]
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out = cv2.VideoWriter(filepath, fourcc, RECORD_FPS, (w, h))
             
-            for f in frames:
+            # Đảm bảo width và height là số CHẴN (Bắt buộc với một số codec để tránh crash C++)
+            if w % 2 != 0: w -= 1
+            if h % 2 != 0: h -= 1
+            
+            logger.info("[DIAG-SAVE] ⏱ Tạo VideoWriter: %s (%dx%d)", filepath, w, h)
+            import sys
+            sys.stdout.flush()
+            
+            # Sử dụng XVID và .avi thay vì mp4v để tránh lỗi GIL Deadlock / Freeze trên Windows Media Foundation
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            out = cv2.VideoWriter(filepath, fourcc, RECORD_FPS, (w, h))
+            if not out.isOpened():
+                logger.error("❌ VideoWriter KHÔNG thể mở: %s", filepath)
+                return
+            
+            logger.info("[DIAG-SAVE] ⏱ Bắt đầu ghi %d frames...", len(frames))
+            sys.stdout.flush()
+            for i, f in enumerate(frames):
+                # Resize frame nếu bị lẻ kích thước
+                if f.shape[1] != w or f.shape[0] != h:
+                    f = cv2.resize(f, (w, h))
                 out.write(f)
             out.release()
-            logger.info("✅ Đã lưu video tại: %s (%d frames)", filepath, len(frames))
+            logger.info("[DIAG-SAVE] ✅ Đã lưu video tại: %s (%d frames)", filepath, len(frames))
         except Exception as e:
-            logger.error("❌ Lỗi ghi video sự cố: %s", e)
+            logger.error("❌ Lỗi ghi video sự cố: %s", e, exc_info=True)
 
     def on_closing(self):
         self.stop_all_cameras()

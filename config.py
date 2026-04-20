@@ -51,8 +51,8 @@ class Config:
     # Ngưỡng độ tin cậy
     # ──────────────────────────────────────────────
     CONFIDENCE_THRESHOLD: float = float(os.getenv("CONFIDENCE_THRESHOLD", "0.25"))
-    FIRE_CONFIDENCE_THRESHOLD: float = float(os.getenv("FIRE_CONFIDENCE_THRESHOLD", "0.05"))
-    SMOKE_CONFIDENCE_THRESHOLD: float = float(os.getenv("SMOKE_CONFIDENCE_THRESHOLD", "0.05"))
+    FIRE_CONFIDENCE_THRESHOLD: float = float(os.getenv("FIRE_CONFIDENCE_THRESHOLD", "0.01"))
+    SMOKE_CONFIDENCE_THRESHOLD: float = float(os.getenv("SMOKE_CONFIDENCE_THRESHOLD", "0.01"))
 
     # ──────────────────────────────────────────────
     # Quy tắc xác nhận cháy
