@@ -4,9 +4,10 @@ Load từ file .env hoặc dùng giá trị mặc định.
 """
 
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+from persistent_env import load_application_env
+
+load_application_env()
 
 
 class Config:
@@ -66,6 +67,14 @@ class Config:
     TELEGRAM_CHAT_ID: str = os.getenv("TELEGRAM_CHAT_ID", "")
     WEBHOOK_URL: str = os.getenv("WEBHOOK_URL", "")
     ALERT_COOLDOWN_SECONDS: float = float(os.getenv("ALERT_COOLDOWN_SECONDS", "60"))
+
+    # ──────────────────────────────────────────────
+    # Zalo OA (Official Account) API
+    #   ZALO_OA_TOKEN : OA Access Token
+    #   ZALO_USER_ID  : ID người dùng Zalo nhận thông báo
+    # ──────────────────────────────────────────────
+    ZALO_OA_TOKEN: str = os.getenv("ZALO_OA_TOKEN", "")
+    ZALO_USER_ID: str = os.getenv("ZALO_USER_ID", "")
 
     # ──────────────────────────────────────────────
     # Camera

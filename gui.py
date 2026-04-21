@@ -23,6 +23,7 @@ from config import Config
 from logger_config import setup_logging
 from detector import ObjectDetector
 from fire_tracker import FireTracker
+from persistent_env import get_persistent_env_path, save_env_value
 from telegram_notifier import TelegramNotifier
 
 logger = logging.getLogger(__name__)
@@ -618,47 +619,124 @@ class SecurityApp(ctk.CTk):
         self.btn_stop = ctk.CTkButton(ctrl, text="■ Dừng", height=38, fg_color=CLR_RED, hover_color="#e03131", font=ctk.CTkFont(size=12, weight="bold"), corner_radius=8, state="disabled", command=self.stop_all_cameras)
         self.btn_stop.grid(row=0, column=2, padx=(2, 0), sticky="ew")
 
-        # ── Cấu Hình API (Webhook) ──
-        ctk.CTkLabel(panel, text="🌐  CẤU HÌNH API", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=5, column=0, padx=14, pady=(8, 6), sticky="w")
-        
+        # ── Cấu Hình Zalo OA API ──
+        ctk.CTkLabel(panel, text="📱  ZALO OA API", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=5, column=0, padx=14, pady=(8, 4), sticky="w")
+
         api_frame = ctk.CTkFrame(panel, fg_color=CLR_PANEL2, corner_radius=8)
-        api_frame.grid(row=6, column=0, padx=12, pady=(0, 16), sticky="ew")
+        api_frame.grid(row=6, column=0, padx=12, pady=(0, 14), sticky="ew")
         api_frame.grid_columnconfigure(0, weight=1)
-        
-        self.api_entry = ctk.CTkEntry(api_frame, placeholder_text="Nhập URL API Webhook...", fg_color="#2a2d3e", border_color=CLR_BORDER, text_color=CLR_TEXT, font=ctk.CTkFont(size=11))
-        self.api_entry.grid(row=0, column=0, padx=8, pady=(8, 4), sticky="ew")
-        # Load current API from config
-        if hasattr(Config, "WEBHOOK_URL") and Config.WEBHOOK_URL:
-            self.api_entry.insert(0, Config.WEBHOOK_URL)
-            
-        self.btn_save_api = ctk.CTkButton(api_frame, text="Lưu API", height=28, fg_color="#1864ab", hover_color="#1864ab", font=ctk.CTkFont(size=11, weight="bold"), corner_radius=6, command=self._save_api_config)
-        self.btn_save_api.grid(row=1, column=0, padx=8, pady=(0, 8), sticky="ew")
+
+        # ── OA Access Token ──
+        lbl_token = ctk.CTkFrame(api_frame, fg_color="transparent")
+        lbl_token.grid(row=0, column=0, padx=8, pady=(8, 0), sticky="ew")
+        ctk.CTkLabel(lbl_token, text="OA Access Token", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_TEXT_DIM, anchor="w").pack(side="left")
+
+        entry_row_token = ctk.CTkFrame(api_frame, fg_color="transparent")
+        entry_row_token.grid(row=1, column=0, padx=8, pady=(2, 4), sticky="ew")
+        entry_row_token.grid_columnconfigure(0, weight=1)
+        self.zalo_token_entry = ctk.CTkEntry(
+            entry_row_token, placeholder_text="Nhập OA Access Token...",
+            fg_color="#2a2d3e", border_color=CLR_BORDER,
+            text_color=CLR_TEXT, font=ctk.CTkFont(size=11), show="•"
+        )
+        self.zalo_token_entry.grid(row=0, column=0, sticky="ew")
+        ctk.CTkButton(
+            entry_row_token, text="✕", width=28, height=28,
+            fg_color="#3a1a1a", hover_color=CLR_RED,
+            text_color=CLR_TEXT_DIM, font=ctk.CTkFont(size=12),
+            command=lambda: self._clear_api_field(self.zalo_token_entry, "ZALO_OA_TOKEN")
+        ).grid(row=0, column=1, padx=(4, 0))
+
+        # ── Zalo User ID ──
+        lbl_uid = ctk.CTkFrame(api_frame, fg_color="transparent")
+        lbl_uid.grid(row=2, column=0, padx=8, pady=(4, 0), sticky="ew")
+        ctk.CTkLabel(lbl_uid, text="User ID (người nhận)", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_TEXT_DIM, anchor="w").pack(side="left")
+
+        entry_row_uid = ctk.CTkFrame(api_frame, fg_color="transparent")
+        entry_row_uid.grid(row=3, column=0, padx=8, pady=(2, 4), sticky="ew")
+        entry_row_uid.grid_columnconfigure(0, weight=1)
+        self.zalo_uid_entry = ctk.CTkEntry(
+            entry_row_uid, placeholder_text="Nhập Zalo User ID...",
+            fg_color="#2a2d3e", border_color=CLR_BORDER,
+            text_color=CLR_TEXT, font=ctk.CTkFont(size=11)
+        )
+        self.zalo_uid_entry.grid(row=0, column=0, sticky="ew")
+        ctk.CTkButton(
+            entry_row_uid, text="✕", width=28, height=28,
+            fg_color="#3a1a1a", hover_color=CLR_RED,
+            text_color=CLR_TEXT_DIM, font=ctk.CTkFont(size=12),
+            command=lambda: self._clear_api_field(self.zalo_uid_entry, "ZALO_USER_ID")
+        ).grid(row=0, column=1, padx=(4, 0))
+
+        # ── Nút Lưu / Xóa tất cả ──
+        btn_row = ctk.CTkFrame(api_frame, fg_color="transparent")
+        btn_row.grid(row=4, column=0, padx=8, pady=(0, 8), sticky="ew")
+        btn_row.grid_columnconfigure(0, weight=1)
+        btn_row.grid_columnconfigure(1, weight=1)
+
+        self.btn_save_api = ctk.CTkButton(
+            btn_row, text="💾 Lưu API", height=30,
+            fg_color="#1864ab", hover_color="#1c7ed6",
+            font=ctk.CTkFont(size=11, weight="bold"), corner_radius=6,
+            command=self._save_api_config
+        )
+        self.btn_save_api.grid(row=0, column=0, padx=(0, 3), sticky="ew")
+
+        ctk.CTkButton(
+            btn_row, text="🗑 Xóa API", height=30,
+            fg_color="#3a1a1a", hover_color=CLR_RED,
+            font=ctk.CTkFont(size=11, weight="bold"), corner_radius=6,
+            command=self._clear_all_api
+        ).grid(row=0, column=1, padx=(3, 0), sticky="ew")
+
+        # Load giá trị hiện tại từ Config vào các ô nhập
+        if getattr(Config, "ZALO_OA_TOKEN", ""):
+            self.zalo_token_entry.insert(0, Config.ZALO_OA_TOKEN)
+        if getattr(Config, "ZALO_USER_ID", ""):
+            self.zalo_uid_entry.insert(0, Config.ZALO_USER_ID)
 
     def _save_api_config(self):
-        new_api = self.api_entry.get().strip()
-        Config.WEBHOOK_URL = new_api
-        
-        # Save to .env
-        env_path = '.env'
-        lines = []
-        if os.path.exists(env_path):
-            with open(env_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
-                
-        found = False
-        with open(env_path, 'w', encoding='utf-8') as f:
-            for line in lines:
-                if line.startswith('WEBHOOK_URL='):
-                    f.write(f'WEBHOOK_URL={new_api}\n')
-                    found = True
-                else:
-                    f.write(line)
-            if not found:
-                f.write(f'WEBHOOK_URL={new_api}\n')
-                
-        logger.info(f"✅ Đã lưu API Webhook thành công: {new_api if new_api else 'Rỗng'}")
-        self.btn_save_api.configure(text="Đã Lưu ✔️", fg_color=CLR_GREEN)
-        self.after(2000, lambda: self.btn_save_api.configure(text="Lưu API", fg_color="#1864ab"))
+        """Lưu Zalo OA Token + User ID vào file cấu hình bền vững và nạp lại runtime."""
+        new_token = self.zalo_token_entry.get().strip()
+        new_uid   = self.zalo_uid_entry.get().strip()
+
+        # Cập nhật runtime
+        Config.ZALO_OA_TOKEN = new_token
+        Config.ZALO_USER_ID  = new_uid
+
+        # Ghi vào persistent env để lần mở app sau vẫn còn
+        env_path = get_persistent_env_path()
+        save_env_value(env_path, "ZALO_OA_TOKEN", new_token)
+        save_env_value(env_path, "ZALO_USER_ID", new_uid)
+
+        # Reload notifier credentials
+        if hasattr(self, 'notifier') and self.notifier:
+            self.notifier.reload_credentials()
+
+        token_preview = f"{new_token[:8]}..." if len(new_token) > 8 else (new_token or "<rỗng>")
+        logger.info("✅ Đã lưu Zalo OA API — Token: %s | User ID: %s", token_preview, new_uid or "<rỗng>")
+        self.btn_save_api.configure(text="✔ Đã Lưu!", fg_color=CLR_GREEN)
+        self.after(2000, lambda: self.btn_save_api.configure(text="💾 Lưu API", fg_color="#1864ab"))
+
+    def _clear_api_field(self, entry: ctk.CTkEntry, env_key: str):
+        """Xóa nội dung 1 ô nhập và ghi đè giá trị rỗng vào cấu hình bền vững."""
+        entry.delete(0, "end")
+        if env_key == "ZALO_OA_TOKEN":
+            Config.ZALO_OA_TOKEN = ""
+        elif env_key == "ZALO_USER_ID":
+            Config.ZALO_USER_ID = ""
+        env_path = get_persistent_env_path()
+        save_env_value(env_path, env_key, "")
+        if hasattr(self, 'notifier') and self.notifier:
+            self.notifier.reload_credentials()
+        logger.info("🗑 Đã xóa %s khỏi cấu hình.", env_key)
+
+    def _clear_all_api(self):
+        """Xóa toàn bộ Zalo API (token + user ID)."""
+        self._clear_api_field(self.zalo_token_entry, "ZALO_OA_TOKEN")
+        self._clear_api_field(self.zalo_uid_entry,   "ZALO_USER_ID")
+        logger.info("🗑 Đã xóa toàn bộ Zalo API.")
+
 
     def _build_video_panel(self):
         self.video_panel_container = ctk.CTkFrame(self, fg_color=CLR_PANEL, corner_radius=12)

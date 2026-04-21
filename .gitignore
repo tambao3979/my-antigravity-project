@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # Cấu hình môi trường ảo
+.venv/
 venv/
 env/
 .env
@@ -28,3 +29,7 @@ wheels/
 .vscode/
 .idea/
 .DS_Store
+
+# Dữ liệu sinh ra khi chạy / đóng gói
+events/
+logs/
