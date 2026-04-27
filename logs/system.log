@@ -1032,3 +1032,17 @@ RuntimeError: Excel export requires optional dependency: openpyxl
 [2026-04-27 14:53:40] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\3.mp4"]
 [2026-04-27 14:53:40] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
 [2026-04-27 14:53:40] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-27 14:58:11] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-27 15:56:53] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-27 15:57:12] [INFO] [__main__] ==================================================
+[2026-04-27 15:57:12] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 15:57:12 27/04/2026
+[2026-04-27 15:57:12] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-27 15:57:12] [INFO] [__main__] SystemMonitorAgent running in background, interval 2.0s
+[2026-04-27 15:57:12] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-27 15:57:12] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-27 15:57:12] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-27 15:57:12] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-27 15:57:12] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 15:57:12] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-27 15:57:12] [INFO] [__main__] ==================================================
+[2026-04-27 15:58:16] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
