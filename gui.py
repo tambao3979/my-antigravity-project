@@ -28,7 +28,7 @@ from fire_tracker import FireTracker
 from mqtt_publisher import AsyncMQTTPublisher
 from persistent_env import get_persistent_env_path, save_env_value
 from resource_monitor import ResourceMetrics, SystemMonitorAgent
-from roi_tools import class_counts, filter_detections_by_roi, nearest_vertex
+from roi_tools import class_counts, filter_detections_by_roi, frame_point_from_widget_event, nearest_vertex
 from telegram_notifier import TelegramNotifier
 
 logger = logging.getLogger(__name__)
@@ -1397,17 +1397,7 @@ class SecurityApp(ctk.CTk):
         display = self._display_maps.get(src)
         if not display:
             return None
-
-        x = event.x - display["offset_x"]
-        y = event.y - display["offset_y"]
-        if x < 0 or y < 0 or x > display["image_w"] or y > display["image_h"]:
-            return None
-
-        frame_x = int(x / max(display["image_w"], 1) * display["frame_w"])
-        frame_y = int(y / max(display["image_h"], 1) * display["frame_h"])
-        frame_x = max(0, min(frame_x, display["frame_w"] - 1))
-        frame_y = max(0, min(frame_y, display["frame_h"] - 1))
-        return frame_x, frame_y
+        return frame_point_from_widget_event(event, display, display.get("widget"))
 
     def _should_defer_capture_release(self, stream: CameraStream) -> bool:
         if os.name != "nt" or not stream.is_video_file:
@@ -1897,6 +1887,7 @@ class SecurityApp(ctk.CTk):
             nw, nh = int(iw * scale), int(ih * scale)
             if src is not None:
                 self._display_maps[src] = {
+                    "widget": lbl,
                     "frame_w": iw,
                     "frame_h": ih,
                     "image_w": nw,

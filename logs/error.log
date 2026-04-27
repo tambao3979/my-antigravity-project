@@ -25,3 +25,7 @@ Traceback (most recent call last):
     raise RuntimeError("Excel export requires optional dependency: openpyxl") from exc
 RuntimeError: Excel export requires optional dependency: openpyxl
 [2026-04-27 12:45:04] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 13:53:27] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 13:54:54] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 14:03:12] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 14:52:20] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!

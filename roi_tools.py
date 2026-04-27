@@ -7,7 +7,7 @@ render path without allocating masks every frame.
 
 from __future__ import annotations
 
-from typing import Iterable, Sequence, Tuple, TypeVar
+from typing import Any, Iterable, Mapping, Sequence, Tuple, TypeVar
 
 Point = Tuple[int, int]
 TDetection = TypeVar("TDetection")
@@ -70,6 +70,45 @@ def nearest_vertex(
             best_index = index
 
     return best_index
+
+
+def frame_point_from_widget_event(
+    event: Any,
+    display: Mapping[str, int],
+    widget: Any,
+) -> Point | None:
+    """
+    Convert a Tk event to original-frame coordinates.
+
+    CustomTkinter labels bind events on internal child widgets. Root coordinates
+    keep the calculation stable regardless of which child received the click.
+    """
+    if not display or widget is None:
+        return None
+
+    try:
+        local_x = int(getattr(event, "x_root")) - int(widget.winfo_rootx())
+        local_y = int(getattr(event, "y_root")) - int(widget.winfo_rooty())
+    except Exception:
+        local_x = int(getattr(event, "x", -1))
+        local_y = int(getattr(event, "y", -1))
+
+    image_x = local_x - int(display.get("offset_x", 0))
+    image_y = local_y - int(display.get("offset_y", 0))
+    image_w = max(1, int(display.get("image_w", 1)))
+    image_h = max(1, int(display.get("image_h", 1)))
+    frame_w = max(1, int(display.get("frame_w", 1)))
+    frame_h = max(1, int(display.get("frame_h", 1)))
+
+    if image_x < 0 or image_y < 0 or image_x > image_w or image_y > image_h:
+        return None
+
+    frame_x = int(image_x / image_w * frame_w)
+    frame_y = int(image_y / image_h * frame_h)
+    return (
+        max(0, min(frame_x, frame_w - 1)),
+        max(0, min(frame_y, frame_h - 1)),
+    )
 
 
 def class_counts(detections: Iterable[TDetection]) -> dict[str, int]:
