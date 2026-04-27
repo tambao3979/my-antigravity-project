@@ -143,3 +143,18 @@ class Config:
     # Ghi nhận Sự cố (Event Recording)
     # ──────────────────────────────────────────────
     EVENT_DIR: str = os.getenv("EVENT_DIR", "events")
+    EVENT_DB_PATH: str = os.getenv("EVENT_DB_PATH", os.path.join(EVENT_DIR, "events.db"))
+    EVENT_SNAPSHOT_DIR: str = os.getenv("EVENT_SNAPSHOT_DIR", os.path.join(EVENT_DIR, "snapshots"))
+    EXPORT_DIR: str = os.getenv("EXPORT_DIR", "exports")
+
+    # MQTT alerts are optional to keep edge deployments lightweight.
+    MQTT_ENABLED: bool = _env_bool("MQTT_ENABLED", "false")
+    MQTT_HOST: str = os.getenv("MQTT_HOST", "")
+    MQTT_PORT: int = int(os.getenv("MQTT_PORT", "1883"))
+    MQTT_TOPIC: str = os.getenv("MQTT_TOPIC", "camera_ai/alerts")
+    MQTT_CLIENT_ID: str = os.getenv("MQTT_CLIENT_ID", "camera-ai-edge")
+
+    # Lightweight hardware resource monitor.
+    RESOURCE_MONITOR_ENABLED: bool = _env_bool("RESOURCE_MONITOR_ENABLED", "true")
+    RESOURCE_MONITOR_INTERVAL_SECONDS: float = float(os.getenv("RESOURCE_MONITOR_INTERVAL_SECONDS", "2.0"))
+    RESOURCE_MONITOR_GPU_INDEX: int = int(os.getenv("RESOURCE_MONITOR_GPU_INDEX", "0"))

@@ -22,8 +22,13 @@ from PIL import Image, ImageTk
 from config import Config
 from logger_config import setup_logging
 from detector import ObjectDetector
+from event_store import EventStore
+from export_utils import export_count_rows_csv, export_count_rows_excel
 from fire_tracker import FireTracker
+from mqtt_publisher import AsyncMQTTPublisher
 from persistent_env import get_persistent_env_path, save_env_value
+from resource_monitor import ResourceMetrics, SystemMonitorAgent
+from roi_tools import class_counts, filter_detections_by_roi, nearest_vertex
 from telegram_notifier import TelegramNotifier
 
 logger = logging.getLogger(__name__)
@@ -250,6 +255,12 @@ class CameraStream:
         
         self.latest_frame: Optional[np.ndarray] = None
         self.latest_detections: list = []
+        self.inference_latency_ms = 0.0
+        self.last_inference_at = 0.0
+        self.last_counts: dict = {}
+        self.roi_points: list[tuple[int, int]] = []
+        self.roi_enabled = False
+        self.roi_drag_index: Optional[int] = None
         
         self.fps = 0.0
         self._fps_start = time.time()
@@ -475,6 +486,10 @@ class SecurityApp(ctk.CTk):
         self._retained_video_caps: list = []
         self._last_zoom_image = None  # Giữ reference CTkImage tránh GC sớm gây check_dpi_scaling crash
         self._ui_log_queue: "queue.SimpleQueue[str]" = queue.SimpleQueue()
+        self._resource_metrics_queue: "queue.Queue[ResourceMetrics]" = queue.Queue(maxsize=1)
+        self._display_maps: Dict[str, dict] = {}
+        self._count_history: list[dict] = []
+        self._last_count_sample = 0.0
 
         self.class_colors: dict = {}
         self.class_visibility: dict = {}
@@ -484,14 +499,31 @@ class SecurityApp(ctk.CTk):
             "Tất cả Camera": {
                 "fire_conf": Config.FIRE_CONFIDENCE_THRESHOLD,
                 "def_conf": Config.CONFIDENCE_THRESHOLD,
+                "iou": Config.YOLO_IOU,
                 "class_visibility": {}
             }
         }
         self.config_target_var = ctk.StringVar(value="Tất cả Camera")
+        self.roi_mode_var = ctk.BooleanVar(value=False)
 
         self.is_inferencing = False
         self._inference_thread: Optional[threading.Thread] = None
         self._cached_allowed_ids: Optional[set] = None
+        self.event_store = EventStore(Config.EVENT_DB_PATH, Config.EVENT_SNAPSHOT_DIR)
+        self.mqtt_publisher = AsyncMQTTPublisher(
+            host=Config.MQTT_HOST,
+            port=Config.MQTT_PORT,
+            topic=Config.MQTT_TOPIC,
+            client_id=Config.MQTT_CLIENT_ID,
+            enabled=Config.MQTT_ENABLED,
+        )
+        self.system_monitor_agent: Optional[SystemMonitorAgent] = None
+        if Config.RESOURCE_MONITOR_ENABLED:
+            self.system_monitor_agent = SystemMonitorAgent(
+                output_queue=self._resource_metrics_queue,
+                poll_interval=Config.RESOURCE_MONITOR_INTERVAL_SECONDS,
+                gpu_index=Config.RESOURCE_MONITOR_GPU_INDEX,
+            )
 
         # ── Layout ──
         self.grid_rowconfigure(0, weight=0)
@@ -517,10 +549,14 @@ class SecurityApp(ctk.CTk):
         sys.stdout = _StdoutRedirect(self._ui_log_queue)
         sys.stderr = _StdoutRedirect(self._ui_log_queue)
         self.after(100, self._drain_log_queue)
+        self.after(500, self._drain_resource_metrics_queue)
 
         logger.info("=" * 50)
         logger.info("🔐 Đăng nhập thành công: %s @ %s", LOGIN_USERNAME, datetime.now().strftime("%H:%M:%S %d/%m/%Y"))
         logger.info("✅ Giao diện Camera AI đã khởi động")
+        if self.system_monitor_agent:
+            self.system_monitor_agent.start()
+            logger.info("SystemMonitorAgent running in background, interval %.1fs", Config.RESOURCE_MONITOR_INTERVAL_SECONDS)
         logger.info("⏳ Đang nạp model YOLO...")
         self.detector = ObjectDetector()
         self.notifier = TelegramNotifier()
@@ -577,6 +613,12 @@ class SecurityApp(ctk.CTk):
         
         btn_logs = ctk.CTkButton(btn_frame, text="📁 Logs (Lịch sử)", width=120, height=28, font=ctk.CTkFont(size=12, weight="bold"), fg_color=CLR_PANEL2, hover_color="#3a3d4e", command=self._open_logs_folder)
         btn_logs.pack(side="right", padx=5)
+
+        btn_export_csv = ctk.CTkButton(btn_frame, text="CSV", width=54, height=28, font=ctk.CTkFont(size=12, weight="bold"), fg_color=CLR_PANEL2, hover_color="#3a3d4e", command=self._export_counts_csv)
+        btn_export_csv.pack(side="right", padx=5)
+
+        btn_export_xlsx = ctk.CTkButton(btn_frame, text="XLSX", width=58, height=28, font=ctk.CTkFont(size=12, weight="bold"), fg_color=CLR_PANEL2, hover_color="#3a3d4e", command=self._export_counts_excel)
+        btn_export_xlsx.pack(side="right", padx=5)
 
         self.clock_label = ctk.CTkLabel(hdr, text="", font=ctk.CTkFont(family="Segoe UI Mono", size=14), text_color=CLR_TEXT_DIM)
         self.clock_label.grid(row=0, column=2, padx=20, pady=8, sticky="e")
@@ -776,7 +818,10 @@ class SecurityApp(ctk.CTk):
         
         self.zoom_lbl_video = ctk.CTkLabel(self.zoom_overlay, text="")
         self.zoom_lbl_video.grid(row=1, column=0, sticky="nsew")
-        self.zoom_lbl_video.bind("<Button-1>", lambda e: self._toggle_zoom(self._zoomed_src) if self._zoomed_src else None)
+        self.zoom_lbl_video.bind("<Button-1>", lambda e: self._on_video_left_click(e, self._zoomed_src) if self._zoomed_src else None)
+        self.zoom_lbl_video.bind("<B1-Motion>", lambda e: self._on_video_drag(e, self._zoomed_src) if self._zoomed_src else None)
+        self.zoom_lbl_video.bind("<ButtonRelease-1>", lambda e: self._on_video_release(e, self._zoomed_src) if self._zoomed_src else None)
+        self.zoom_lbl_video.bind("<Button-3>", lambda e: self._on_video_right_click(e, self._zoomed_src) if self._zoomed_src else None)
 
     def _drain_log_queue(self):
         try:
@@ -794,6 +839,25 @@ class SecurityApp(ctk.CTk):
         try:
             if self.winfo_exists():
                 self.after(100, self._drain_log_queue)
+        except Exception:
+            pass
+
+    def _drain_resource_metrics_queue(self):
+        latest = None
+        try:
+            while True:
+                latest = self._resource_metrics_queue.get_nowait()
+        except queue.Empty:
+            pass
+        except Exception:
+            latest = None
+
+        if latest is not None:
+            self._update_resource_stats(latest)
+
+        try:
+            if self.winfo_exists():
+                self.after(500, self._drain_resource_metrics_queue)
         except Exception:
             pass
 
@@ -815,6 +879,10 @@ class SecurityApp(ctk.CTk):
         self.stat_obj   = self._stat_card(sf, "TỔNG VẬT THỂ","0", CLR_TEXT,   0, 1)
         self.stat_fire  = self._stat_card(sf, "LỬA/KHÓI",    "0", CLR_YELLOW, 1, 0)
         self.stat_state = self._stat_card(sf, "TRẠNG THÁI",  "OK", CLR_GREEN,  1, 1)
+        self.stat_cpu   = self._stat_card(sf, "CPU",          "--", CLR_TEXT,   2, 0)
+        self.stat_ram   = self._stat_card(sf, "RAM",          "--", CLR_TEXT,   2, 1)
+        self.stat_gpu   = self._stat_card(sf, "GPU",          "N/A", CLR_TEXT_DIM, 3, 0)
+        self.stat_vram  = self._stat_card(sf, "VRAM",         "N/A", CLR_TEXT_DIM, 3, 1)
 
         ctk.CTkLabel(panel, text="🎯  BỘ LỌC HIỂN THỊ", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=2, column=0, padx=14, pady=(8, 6), sticky="w")
 
@@ -866,6 +934,38 @@ class SecurityApp(ctk.CTk):
         self.slider_def.grid(row=3, column=0, padx=8, pady=(0, 8), sticky="ew")
         self.lbl_val_def.configure(text=f"{int(self.slider_def.get()*100)}%")
 
+        hdr_iou = ctk.CTkFrame(thresh_frame, fg_color="transparent")
+        hdr_iou.grid(row=4, column=0, sticky="ew", padx=8, pady=(2, 0))
+        ctk.CTkLabel(hdr_iou, text="NMS IoU", font=ctk.CTkFont(size=10)).pack(side="left")
+        self.lbl_val_iou = ctk.CTkLabel(hdr_iou, text="85%", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_GREEN)
+        self.lbl_val_iou.pack(side="right")
+
+        self.slider_iou = ctk.CTkSlider(thresh_frame, from_=0.30, to=0.95, number_of_steps=65, height=12, button_color=CLR_GREEN, progress_color=CLR_GREEN, command=self._on_threshold_change)
+        self.slider_iou.set(Config.YOLO_IOU)
+        self.slider_iou.grid(row=5, column=0, padx=8, pady=(0, 8), sticky="ew")
+        self.lbl_val_iou.configure(text=f"{int(self.slider_iou.get()*100)}%")
+
+        roi_row = ctk.CTkFrame(thresh_frame, fg_color="transparent")
+        roi_row.grid(row=6, column=0, sticky="ew", padx=8, pady=(0, 8))
+        roi_row.grid_columnconfigure(0, weight=1)
+        ctk.CTkSwitch(
+            roi_row,
+            text="ROI",
+            variable=self.roi_mode_var,
+            font=ctk.CTkFont(size=10, weight="bold"),
+            command=self._on_roi_mode_change,
+        ).grid(row=0, column=0, sticky="w")
+        ctk.CTkButton(
+            roi_row,
+            text="Clear",
+            width=54,
+            height=24,
+            fg_color=CLR_PANEL2,
+            hover_color="#3a3d4e",
+            font=ctk.CTkFont(size=10, weight="bold"),
+            command=self._clear_roi_for_target,
+        ).grid(row=0, column=1, sticky="e")
+
 
         ctk.CTkLabel(panel, text="📋  NHẬT KÝ SỰ KIỆN", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=7, column=0, padx=14, pady=(8, 6), sticky="w")
 
@@ -910,9 +1010,49 @@ class SecurityApp(ctk.CTk):
         card.grid(row=row, column=col, padx=6, pady=6, sticky="ew")
         card.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(card, text=title, font=ctk.CTkFont(size=9, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=0, column=0, pady=(6, 0))
-        lbl = ctk.CTkLabel(card, text=value, font=ctk.CTkFont(size=20, weight="bold"), text_color=color)
+        value_size = 15 if title in {"RAM", "GPU", "VRAM"} else 20
+        lbl = ctk.CTkLabel(card, text=value, font=ctk.CTkFont(size=value_size, weight="bold"), text_color=color)
         lbl.grid(row=1, column=0, pady=(0, 6))
         return lbl
+
+    def _update_resource_stats(self, metrics: ResourceMetrics):
+        system = metrics.system
+        if system.error:
+            self.stat_cpu.configure(text="N/A", text_color=CLR_TEXT_DIM)
+            self.stat_ram.configure(text="N/A", text_color=CLR_TEXT_DIM)
+        else:
+            self.stat_cpu.configure(
+                text=f"{system.cpu_percent:.0f}%",
+                text_color=self._resource_color(system.cpu_percent),
+            )
+            ram_total_gb = system.ram_total_mb / 1024.0
+            ram_used_gb = system.ram_used_mb / 1024.0
+            self.stat_ram.configure(
+                text=f"{ram_used_gb:.1f}/{ram_total_gb:.0f}G\n{system.ram_percent:.0f}%",
+                text_color=self._resource_color(system.ram_percent),
+            )
+
+        gpu = metrics.gpu
+        if not gpu.available:
+            self.stat_gpu.configure(text="N/A", text_color=CLR_TEXT_DIM)
+            self.stat_vram.configure(text="N/A", text_color=CLR_TEXT_DIM)
+            return
+
+        self.stat_gpu.configure(
+            text=f"{gpu.utilization_percent:.0f}%\n{gpu.temperature_c:.0f}°C",
+            text_color=self._resource_color(gpu.utilization_percent),
+        )
+        self.stat_vram.configure(
+            text=f"{gpu.vram_used_mb / 1024.0:.1f}/{gpu.vram_total_mb / 1024.0:.0f}G\n{gpu.vram_percent:.0f}%",
+            text_color=self._resource_color(gpu.vram_percent),
+        )
+
+    def _resource_color(self, percent: float) -> str:
+        if percent >= 90.0:
+            return CLR_RED
+        if percent >= 75.0:
+            return CLR_YELLOW
+        return CLR_GREEN
 
     def _tick_clock(self):
         self.clock_label.configure(text=datetime.now().strftime("%H:%M:%S  —  %d/%m/%Y"))
@@ -927,8 +1067,10 @@ class SecurityApp(ctk.CTk):
         cfg = self.camera_configs[target]
         self.slider_fire.set(cfg["fire_conf"])
         self.slider_def.set(cfg["def_conf"])
+        self.slider_iou.set(cfg.get("iou", Config.YOLO_IOU))
         self.lbl_val_fire.configure(text=f"{int(cfg['fire_conf']*100)}%")
         self.lbl_val_def.configure(text=f"{int(cfg['def_conf']*100)}%")
+        self.lbl_val_iou.configure(text=f"{int(cfg.get('iou', Config.YOLO_IOU)*100)}%")
         
         for cls_name, visible in cfg["class_visibility"].items():
             if cls_name in self.class_visibility:
@@ -939,19 +1081,46 @@ class SecurityApp(ctk.CTk):
         
         fire_conf = self.slider_fire.get()
         def_conf = self.slider_def.get()
+        iou = self.slider_iou.get() if hasattr(self, "slider_iou") else Config.YOLO_IOU
         self.lbl_val_fire.configure(text=f"{int(fire_conf*100)}%")
         self.lbl_val_def.configure(text=f"{int(def_conf*100)}%")
+        if hasattr(self, "lbl_val_iou"):
+            self.lbl_val_iou.configure(text=f"{int(iou*100)}%")
+        Config.YOLO_IOU = iou
         
         target = self.config_target_var.get()
         if target in self.camera_configs:
             self.camera_configs[target]["fire_conf"] = fire_conf
             self.camera_configs[target]["def_conf"] = def_conf
+            self.camera_configs[target]["iou"] = iou
             
         if target == "Tất cả Camera":
             for src, cfg in self.camera_configs.items():
                 if src != "Tất cả Camera":
                     cfg["fire_conf"] = fire_conf
                     cfg["def_conf"] = def_conf
+                    cfg["iou"] = iou
+
+    def _on_roi_mode_change(self):
+        if self.roi_mode_var.get():
+            logger.info("ROI edit mode enabled. Left-click video to add/move points; right-click to remove.")
+        else:
+            for stream in self.streams.values():
+                stream.roi_drag_index = None
+            logger.info("ROI edit mode disabled.")
+
+    def _clear_roi_for_target(self):
+        target = self.config_target_var.get()
+        targets = self.streams.values() if target == "Tất cả Camera" else [self.streams.get(target)]
+        cleared = 0
+        for stream in targets:
+            if not stream:
+                continue
+            stream.roi_points.clear()
+            stream.roi_enabled = False
+            stream.roi_drag_index = None
+            cleared += 1
+        logger.info("Cleared ROI for %d stream(s).", cleared)
 
     # ════════════════════════════════════════════════════════
     #  CLASS FILTER 
@@ -1171,6 +1340,75 @@ class SecurityApp(ctk.CTk):
     #  MULTI-CAMERA INFERENCE & RENDER
     # ════════════════════════════════════════════════════════
 
+    def _on_video_left_click(self, event, src: str):
+        if not src:
+            return
+        if not self.roi_mode_var.get():
+            self._toggle_zoom(src)
+            return
+
+        stream = self.streams.get(src)
+        point = self._event_to_frame_point(event, src)
+        if not stream or point is None:
+            return
+
+        frame_w = stream.latest_frame.shape[1] if stream.latest_frame is not None else 640
+        idx = nearest_vertex(point, stream.roi_points, max_distance=max(18.0, frame_w * 0.015))
+        if idx is None:
+            stream.roi_points.append(point)
+            stream.roi_drag_index = len(stream.roi_points) - 1
+        else:
+            stream.roi_points[idx] = point
+            stream.roi_drag_index = idx
+        stream.roi_enabled = len(stream.roi_points) >= 3
+
+    def _on_video_drag(self, event, src: str):
+        if not src or not self.roi_mode_var.get():
+            return
+        stream = self.streams.get(src)
+        point = self._event_to_frame_point(event, src)
+        if not stream or point is None or stream.roi_drag_index is None:
+            return
+        if 0 <= stream.roi_drag_index < len(stream.roi_points):
+            stream.roi_points[stream.roi_drag_index] = point
+            stream.roi_enabled = len(stream.roi_points) >= 3
+
+    def _on_video_release(self, event, src: str):
+        stream = self.streams.get(src) if src else None
+        if stream:
+            stream.roi_drag_index = None
+
+    def _on_video_right_click(self, event, src: str):
+        if not src or not self.roi_mode_var.get():
+            return
+        stream = self.streams.get(src)
+        point = self._event_to_frame_point(event, src)
+        if not stream or point is None or not stream.roi_points:
+            return
+
+        idx = nearest_vertex(point, stream.roi_points, max_distance=40.0)
+        if idx is None:
+            idx = len(stream.roi_points) - 1
+        del stream.roi_points[idx]
+        stream.roi_enabled = len(stream.roi_points) >= 3
+        stream.roi_drag_index = None
+
+    def _event_to_frame_point(self, event, src: str) -> Optional[tuple[int, int]]:
+        display = self._display_maps.get(src)
+        if not display:
+            return None
+
+        x = event.x - display["offset_x"]
+        y = event.y - display["offset_y"]
+        if x < 0 or y < 0 or x > display["image_w"] or y > display["image_h"]:
+            return None
+
+        frame_x = int(x / max(display["image_w"], 1) * display["frame_w"])
+        frame_y = int(y / max(display["image_h"], 1) * display["frame_h"])
+        frame_x = max(0, min(frame_x, display["frame_w"] - 1))
+        frame_y = max(0, min(frame_y, display["frame_h"] - 1))
+        return frame_x, frame_y
+
     def _should_defer_capture_release(self, stream: CameraStream) -> bool:
         if os.name != "nt" or not stream.is_video_file:
             return False
@@ -1253,6 +1491,7 @@ class SecurityApp(ctk.CTk):
                 self.camera_configs[src] = {
                     "fire_conf": Config.FIRE_CONFIDENCE_THRESHOLD,
                     "def_conf": Config.CONFIDENCE_THRESHOLD,
+                    "iou": Config.YOLO_IOU,
                     "class_visibility": {k: v.get() for k, v in self.class_visibility.items()}
                 }
                 
@@ -1292,8 +1531,11 @@ class SecurityApp(ctk.CTk):
                 lbl.grid(row=1, column=0, sticky="nsew")
                 self.video_labels[src] = lbl
 
-                # Bind click events for zooming
-                lbl.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
+                # Bind click events for zooming / ROI editing
+                lbl.bind("<Button-1>", lambda e, s=src: self._on_video_left_click(e, s))
+                lbl.bind("<B1-Motion>", lambda e, s=src: self._on_video_drag(e, s))
+                lbl.bind("<ButtonRelease-1>", lambda e, s=src: self._on_video_release(e, s))
+                lbl.bind("<Button-3>", lambda e, s=src: self._on_video_right_click(e, s))
                 lbl_title.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
                 hdr.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
                 frame_box.bind("<Button-1>", lambda e, s=src: self._toggle_zoom(s))
@@ -1348,10 +1590,15 @@ class SecurityApp(ctk.CTk):
                     last_processed_frames[src] = stream.frame_id
                     
             if batch_frames:
+                started = time.perf_counter()
                 batch_detections = self.detector.detect_batch(batch_frames, allowed_class_ids=None)
+                latency_ms = (time.perf_counter() - started) * 1000.0
+                per_stream_latency = latency_ms / max(1, len(batch_streams))
                 
                 for stream, detections in zip(batch_streams, batch_detections):
                     stream.latest_detections = detections
+                    stream.inference_latency_ms = per_stream_latency
+                    stream.last_inference_at = time.time()
                 
                 time.sleep(0.005)
             else:
@@ -1422,9 +1669,14 @@ class SecurityApp(ctk.CTk):
                                 
                         filtered_detections.append(det)
                     detections = filtered_detections
+                if stream.roi_enabled and len(stream.roi_points) >= 3:
+                    detections = filter_detections_by_roi(detections, stream.roi_points)
                 
                 # Cập nhật thông số thống kê
-                total_obj += len(detections)
+                stream.last_counts = class_counts(detections)
+                should_sample_counts = time.time() - self._last_count_sample >= 1.0
+                if should_sample_counts:
+                    self._append_count_sample(stream, detections)
                 
                 if not stream.is_paused:
                     fire_confirmed = stream.tracker.update(detections)
@@ -1442,6 +1694,7 @@ class SecurityApp(ctk.CTk):
                         args=(display_frame.copy(), len(fire_dets), stream.display_name),
                         daemon=True,
                     ).start()
+                    self._dispatch_fire_event(stream, display_frame.copy(), fire_dets)
                     
                     # Event Recording Trigger
                     if not stream.is_recording and time.time() > stream.record_cooldown:
@@ -1477,10 +1730,10 @@ class SecurityApp(ctk.CTk):
                 if lbl:
                     if self._zoomed_src is None:
                         # Render bình thường trong grid
-                        self._display_on_label(display_frame, lbl)
+                        self._display_on_label(display_frame, lbl, stream.source)
                     elif self._zoomed_src == stream.source:
                         # Chỉ render lên khung Zoom (overlay)
-                        self._display_on_label(display_frame, self.zoom_lbl_video)
+                        self._display_on_label(display_frame, self.zoom_lbl_video, stream.source)
 
                 # Thống kê
                 visible = [d for d in detections if self._is_class_visible(d.class_name)]
@@ -1489,6 +1742,9 @@ class SecurityApp(ctk.CTk):
                 total_fire += n_fire
                 if stream.tracker.is_tracking and stream.tracker.elapsed >= Config.FIRE_CONFIRM_SECONDS:
                     fire_alerted = True
+
+        if active_streams and time.time() - self._last_count_sample >= 1.0:
+            self._last_count_sample = time.time()
 
         self._update_global_stats(total_obj, total_fire, fire_alerted, active_streams)
 
@@ -1555,7 +1811,81 @@ class SecurityApp(ctk.CTk):
             logger.info("⌛ Tất cả camera đã ngắt, dừng hệ thống.")
             self.after(0, self.stop_all_cameras)
 
-    def _display_on_label(self, frame: np.ndarray, lbl: ctk.CTkLabel):
+    def _append_count_sample(self, stream: CameraStream, detections: list):
+        counts = class_counts(detections)
+        row = {
+            "timestamp": datetime.now().isoformat(timespec="seconds"),
+            "source": stream.display_name,
+            "total": len(detections),
+            "fire": sum(1 for det in detections if det.class_name.lower() == Config.FIRE_CLASS_NAME.lower()),
+            "smoke": sum(1 for det in detections if det.class_name.lower() == Config.SMOKE_CLASS_NAME.lower()),
+        }
+        row.update(counts)
+        self._count_history.append(row)
+        if len(self._count_history) > 10000:
+            del self._count_history[:1000]
+
+    def _export_counts_csv(self):
+        self._export_counts("csv")
+
+    def _export_counts_excel(self):
+        self._export_counts("xlsx")
+
+    def _export_counts(self, fmt: str):
+        rows = list(self._count_history)
+        if not rows:
+            logger.warning("No count data to export yet.")
+            return
+
+        def _run_export():
+            try:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                os.makedirs(Config.EXPORT_DIR, exist_ok=True)
+                if fmt == "xlsx":
+                    path = export_count_rows_excel(rows, os.path.join(Config.EXPORT_DIR, f"counts_{timestamp}.xlsx"))
+                else:
+                    path = export_count_rows_csv(rows, os.path.join(Config.EXPORT_DIR, f"counts_{timestamp}.csv"))
+                logger.info("Exported %d count rows to %s", len(rows), path)
+            except Exception as exc:
+                logger.error("Export failed: %s", exc, exc_info=True)
+
+        threading.Thread(target=_run_export, daemon=True).start()
+
+    def _dispatch_fire_event(self, stream: CameraStream, frame: np.ndarray, fire_detections: list):
+        metrics = {
+            "fps": stream.fps,
+            "latency_ms": stream.inference_latency_ms,
+            "counts": dict(stream.last_counts),
+            "roi_enabled": stream.roi_enabled,
+        }
+
+        def _log_and_publish():
+            try:
+                record = self.event_store.log_event(
+                    event_type="fire_confirmed",
+                    source_name=stream.display_name,
+                    frame=frame,
+                    detections=fire_detections,
+                    metrics=metrics,
+                )
+                logger.info("Event logged #%d with snapshot %s", record.event_id, record.snapshot_path)
+                self.mqtt_publisher.publish_alert(
+                    {
+                        "event_id": record.event_id,
+                        "timestamp": record.timestamp,
+                        "event_type": record.event_type,
+                        "source": record.source_name,
+                        "detection_count": record.detection_count,
+                        "snapshot_path": record.snapshot_path,
+                        "metrics": metrics,
+                    }
+                )
+            except Exception as exc:
+                logger.error("Event logging failed: %s", exc, exc_info=True)
+
+        threading.Thread(target=_log_and_publish, daemon=True).start()
+
+    def _display_on_label(self, frame: np.ndarray, lbl: ctk.CTkLabel, src: Optional[str] = None):
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # parent frame size
         parent = lbl.master
@@ -1565,6 +1895,15 @@ class SecurityApp(ctk.CTk):
             ih, iw = rgb.shape[:2]
             scale = min(lw / iw, lh / ih)
             nw, nh = int(iw * scale), int(ih * scale)
+            if src is not None:
+                self._display_maps[src] = {
+                    "frame_w": iw,
+                    "frame_h": ih,
+                    "image_w": nw,
+                    "image_h": nh,
+                    "offset_x": max(0, (lw - nw) // 2),
+                    "offset_y": max(0, (lh - nh) // 2),
+                }
             rgb = cv2.resize(rgb, (nw, nh), interpolation=cv2.INTER_LINEAR)
             pil = Image.fromarray(rgb)
             tk_img = ImageTk.PhotoImage(image=pil)
@@ -1686,11 +2025,31 @@ class SecurityApp(ctk.CTk):
     #  OVERLAY
     # ════════════════════════════════════════════════════════
 
+    def _draw_roi_overlay(self, frame: np.ndarray, stream: CameraStream):
+        if not stream.roi_points:
+            return
+
+        points = np.array(stream.roi_points, dtype=np.int32)
+        color = (0, 220, 120) if stream.roi_enabled else (0, 180, 255)
+        if len(points) >= 3:
+            overlay = frame.copy()
+            cv2.fillPoly(overlay, [points], color)
+            cv2.addWeighted(overlay, 0.18, frame, 0.82, 0, frame)
+            cv2.polylines(frame, [points], True, color, 2)
+        elif len(points) >= 2:
+            cv2.polylines(frame, [points], False, color, 2)
+
+        for index, (x, y) in enumerate(stream.roi_points, start=1):
+            cv2.circle(frame, (int(x), int(y)), 6, color, -1)
+            cv2.circle(frame, (int(x), int(y)), 8, (255, 255, 255), 1)
+            cv2.putText(frame, str(index), (int(x) + 8, int(y) - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
+
     def _draw_overlay(self, frame: np.ndarray, detections: list, stream: CameraStream) -> np.ndarray:
         frame = frame.copy()
         h, w = frame.shape[:2]
         fire_dets = []
         is_confirmed = (stream.tracker.is_tracking and stream.tracker.elapsed >= Config.FIRE_CONFIRM_SECONDS)
+        self._draw_roi_overlay(frame, stream)
 
         for det in detections:
             if det.is_fire:
@@ -1731,7 +2090,7 @@ class SecurityApp(ctk.CTk):
                 cv2.putText(frame, alert, ((w - atw) // 2, h // 2 + 10), cv2.FONT_HERSHEY_DUPLEX, 1.0, (255, 255, 255), 2)
 
         # Info panel mờ góc trái
-        pw, ph_ = 280, 80
+        pw, ph_ = 330, 112
         ov = frame.copy()
         cv2.rectangle(ov, (0, 0), (pw, ph_), (15, 17, 28), -1)
         cv2.addWeighted(ov, 0.80, frame, 0.20, 0, frame)
@@ -1743,8 +2102,10 @@ class SecurityApp(ctk.CTk):
         fc = (50, 50, 255) if nf > 0 else (200, 200, 200)
         
         cv2.putText(frame, f"FPS: {stream.fps:.1f}", (10, 22), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (180, 220, 255), 1)
-        cv2.putText(frame, f"Vat the: {len(vis)} | Lua/Khoi: {nf}", (10, 46), cv2.FONT_HERSHEY_SIMPLEX, 0.52, fc, 1)
-        cv2.putText(frame, f"{'!!! CANH BAO CHAY !!!' if nf > 0 else 'Binh thuong'}", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.52, fc, 1)
+        cv2.putText(frame, f"Latency: {stream.inference_latency_ms:.1f} ms", (10, 46), cv2.FONT_HERSHEY_SIMPLEX, 0.52, (180, 220, 255), 1)
+        cv2.putText(frame, f"Count: {len(vis)} | Fire/Smoke: {nf}", (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.52, fc, 1)
+        roi_state = "ROI ON" if stream.roi_enabled else ("ROI EDIT" if stream.roi_points else "ROI OFF")
+        cv2.putText(frame, f"{roi_state} | {'ALERT' if nf > 0 else 'Normal'}", (10, 94), cv2.FONT_HERSHEY_SIMPLEX, 0.52, fc, 1)
 
         # Badge Recording nếu đang ghi hình thủ công
         if stream.manual_recording:
@@ -1798,6 +2159,10 @@ class SecurityApp(ctk.CTk):
 
     def on_closing(self):
         self.stop_all_cameras()
+        if self.system_monitor_agent:
+            self.system_monitor_agent.stop(timeout=1.0)
+        if hasattr(self, "mqtt_publisher"):
+            self.mqtt_publisher.stop()
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__
         self.destroy()

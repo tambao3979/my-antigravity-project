@@ -784,3 +784,155 @@
 [2026-04-27 10:48:19] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\app\1.mp4" (140 frames)
 [2026-04-27 10:48:19] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_app_1_mp4_20260427_104819.avi (720x1280)
 [2026-04-27 10:48:19] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 140 frames...
+[2026-04-27 11:15:43] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-27 11:15:50] [INFO] [__main__] ==================================================
+[2026-04-27 11:15:50] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 11:15:50 27/04/2026
+[2026-04-27 11:15:50] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-27 11:15:50] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-27 11:15:50] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-27 11:15:50] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-27 11:15:50] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-27 11:15:50] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 11:15:50] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-27 11:15:50] [INFO] [__main__] ==================================================
+[2026-04-27 11:15:54] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 11:15:55] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 11:15:55] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-27 11:16:16] [INFO] [__main__] ROI edit mode enabled. Left-click video to add/move points; right-click to remove.
+[2026-04-27 11:16:32] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 11:16:32] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-27 11:16:32] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-27 11:16:32] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-27 11:16:32] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-27 11:16:37] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 11:16:37] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 11:16:37] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-27 11:16:37] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 11:16:37] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-27 11:16:57] [ERROR] [__main__] Export failed: Excel export requires optional dependency: openpyxl
+Traceback (most recent call last):
+  File "c:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 32, in export_count_rows_excel
+    from openpyxl import Workbook
+ModuleNotFoundError: No module named 'openpyxl'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\gui.py", line 1769, in _run_export
+    path = export_count_rows_excel(rows, os.path.join(Config.EXPORT_DIR, f"counts_{timestamp}.xlsx"))
+  File "c:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 34, in export_count_rows_excel
+    raise RuntimeError("Excel export requires optional dependency: openpyxl") from exc
+RuntimeError: Excel export requires optional dependency: openpyxl
+[2026-04-27 11:17:00] [INFO] [__main__] Exported 74 count rows to exports\counts_20260427_111700.csv
+[2026-04-27 11:17:17] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\3.mp4"]...
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\3.mp4"]
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-27 11:17:17] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-27 11:17:18] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 11:17:19] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 11:17:19] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-27 11:18:02] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 11:18:02] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\3.mp4"]...
+[2026-04-27 11:18:02] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\3.mp4"]
+[2026-04-27 11:18:02] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-27 11:18:02] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-27 12:44:55] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-27 12:45:04] [INFO] [__main__] ==================================================
+[2026-04-27 12:45:04] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 12:45:04 27/04/2026
+[2026-04-27 12:45:04] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-27 12:45:04] [INFO] [__main__] SystemMonitorAgent running in background, interval 2.0s
+[2026-04-27 12:45:04] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-27 12:45:04] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-27 12:45:04] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-27 12:45:04] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-27 12:45:04] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 12:45:04] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-27 12:45:04] [INFO] [__main__] ==================================================
+[2026-04-27 12:45:21] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 12:45:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:45:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-27 12:45:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:45:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-27 12:45:28] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\1.mp4"!
+[2026-04-27 12:45:28] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\app\1.mp4" (145 frames buffer)...
+[2026-04-27 12:45:28] [INFO] [__main__] Event logged #1 with snapshot events\snapshots\fire_confirmed_D__Downloads_app_1_mp4_20260427T054528_0000.jpg
+[2026-04-27 12:45:28] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\3.mp4"!
+[2026-04-27 12:45:28] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\app\3.mp4" (145 frames buffer)...
+[2026-04-27 12:45:28] [INFO] [__main__] Event logged #2 with snapshot events\snapshots\fire_confirmed_D__Downloads_app_3_mp4_20260427T054528_0000.jpg
+[2026-04-27 12:45:31] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\app\3.mp4"] đã gửi thành công
+[2026-04-27 12:45:31] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\app\1.mp4"] đã gửi thành công
+[2026-04-27 12:46:01] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 12:46:01] [INFO] [__main__] [Record] 🔴 Lưu video sự cố đang ghi dở do hệ thống dừng.
+[2026-04-27 12:46:01] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\app\1.mp4" (163 frames)
+[2026-04-27 12:46:01] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_app_1_mp4_20260427_124601.avi (720x1280)
+[2026-04-27 12:46:01] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 163 frames...
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_app_1_mp4_20260427_124601.avi (163 frames)
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-27 12:46:02] [INFO] [__main__] [Record] 🔴 Lưu video sự cố đang ghi dở do hệ thống dừng.
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\app\3.mp4" (163 frames)
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_app_3_mp4_20260427_124602.avi (720x1280)
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 163 frames...
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_app_3_mp4_20260427_124602.avi (163 frames)
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\3.mp4"]...
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\3.mp4"]
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-27 12:46:02] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-27 12:46:24] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 12:46:24] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:24] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-27 12:46:25] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:25] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-27 12:46:25] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:25] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-27 12:46:25] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:25] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-27 12:46:25] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:25] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-27 12:46:25] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:25] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-27 12:46:25] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:25] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-27 12:46:25] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 12:46:25] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-27 12:46:59] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-27 12:47:03] [INFO] [__main__] 🔍 Thu nhỏ zoom: người dùng thu nhỏ
+[2026-04-27 12:47:05] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-27 12:47:14] [INFO] [__main__] 🔍 Thu nhỏ zoom: người dùng thu nhỏ
+[2026-04-27 12:47:15] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-27 12:47:19] [INFO] [__main__] 🔍 Thu nhỏ zoom: người dùng thu nhỏ
+[2026-04-27 12:47:20] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-27 12:47:23] [INFO] [__main__] 🔍 Thu nhỏ zoom: người dùng thu nhỏ
+[2026-04-27 12:47:44] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\3.mp4"]...
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\3.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]...
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]...
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]...
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]...
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-27 12:47:44] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]...

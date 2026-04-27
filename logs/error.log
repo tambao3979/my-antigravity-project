@@ -9,3 +9,19 @@
 [2026-04-26 15:51:37] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
 [2026-04-26 15:58:58] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
 [2026-04-27 10:47:56] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 11:15:50] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 11:16:57] [ERROR] [Thread-11 (_run_export)] [__main__:gui.py:1774] - Export failed: Excel export requires optional dependency: openpyxl
+Traceback (most recent call last):
+  File "c:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 32, in export_count_rows_excel
+    from openpyxl import Workbook
+ModuleNotFoundError: No module named 'openpyxl'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\gui.py", line 1769, in _run_export
+    path = export_count_rows_excel(rows, os.path.join(Config.EXPORT_DIR, f"counts_{timestamp}.xlsx"))
+  File "c:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 34, in export_count_rows_excel
+    raise RuntimeError("Excel export requires optional dependency: openpyxl") from exc
+RuntimeError: Excel export requires optional dependency: openpyxl
+[2026-04-27 12:45:04] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
