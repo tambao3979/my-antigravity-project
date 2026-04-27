@@ -10,20 +10,66 @@ from persistent_env import load_application_env
 load_application_env()
 
 
+def _resolve_model_path() -> str:
+    """Resolve model path with safe fallback for packaged app."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    bundled_default = os.path.join(base_dir, "weights", "best.pt")
+
+    configured_path = os.getenv("MODEL_PATH", bundled_default).strip()
+    if not configured_path:
+        return bundled_default
+
+    if not os.path.isabs(configured_path):
+        configured_path = os.path.join(base_dir, configured_path)
+
+    if os.path.exists(configured_path):
+        return configured_path
+    return bundled_default
+
+
+def _env_bool(name: str, default: str = "false") -> bool:
+    return os.getenv(name, default).strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_class_names(name: str, default: str) -> set:
+    return {
+        item.strip().lower()
+        for item in os.getenv(name, default).split(",")
+        if item.strip()
+    }
+
+
 class Config:
     # ──────────────────────────────────────────────
     # Model YOLO
     # ──────────────────────────────────────────────
-    MODEL_PATH: str = os.getenv(
-        "MODEL_PATH",
-        r"C:\Users\MAITAM-DNI\PycharmProjects\alarm\runs\detect\train3\weights\best.pt",
-    )
+    MODEL_PATH: str = _resolve_model_path()
+
+    # Stronger inference defaults for small flames and overlapping objects.
+    YOLO_MIN_CONF: float = float(os.getenv("YOLO_MIN_CONF", "0.01"))
+    YOLO_IMGSZ: int = int(os.getenv("YOLO_IMGSZ", "960"))
+    YOLO_IOU: float = float(os.getenv("YOLO_IOU", "0.85"))
+    YOLO_MAX_DET: int = int(os.getenv("YOLO_MAX_DET", "300"))
+    YOLO_AGNOSTIC_NMS: bool = _env_bool("YOLO_AGNOSTIC_NMS", "false")
+    YOLO_AUGMENT: bool = _env_bool("YOLO_AUGMENT", "false")
 
     # ──────────────────────────────────────────────
     # Tên nhãn lớp đặc biệt (dùng cho logic fire/smoke)
     # ──────────────────────────────────────────────
     FIRE_CLASS_NAME: str = os.getenv("FIRE_CLASS_NAME", "fire")
     SMOKE_CLASS_NAME: str = os.getenv("SMOKE_CLASS_NAME", "smoke")
+
+    # Extra tiled pass for tiny hazards. Only fire/smoke are tiled by default.
+    TILED_DETECTION_ENABLED: bool = _env_bool("TILED_DETECTION_ENABLED", "true")
+    TILED_DETECTION_CLASSES: set = _env_class_names(
+        "TILED_DETECTION_CLASSES",
+        f"{FIRE_CLASS_NAME},{SMOKE_CLASS_NAME}",
+    )
+    TILED_DETECTION_TILE_SIZE: int = int(os.getenv("TILED_DETECTION_TILE_SIZE", "512"))
+    TILED_DETECTION_OVERLAP: int = int(os.getenv("TILED_DETECTION_OVERLAP", "128"))
+    TILED_DETECTION_BATCH_SIZE: int = int(os.getenv("TILED_DETECTION_BATCH_SIZE", "4"))
+    TILED_DETECTION_MERGE_IOU: float = float(os.getenv("TILED_DETECTION_MERGE_IOU", "0.85"))
+    FIRE_MISSING_GRACE_SECONDS: float = float(os.getenv("FIRE_MISSING_GRACE_SECONDS", "1.0"))
 
     # ──────────────────────────────────────────────
     # Class Registry — metadata hiển thị cho tất cả lớp

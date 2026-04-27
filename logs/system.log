@@ -93,3 +93,694 @@
 [2026-04-21 15:25:51] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
 [2026-04-21 15:25:51] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
 [2026-04-21 15:25:55] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-21 20:14:16] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-21 20:14:24] [INFO] [__main__] ==================================================
+[2026-04-21 20:14:24] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:14:24 21/04/2026
+[2026-04-21 20:14:24] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-21 20:14:24] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-21 20:14:24] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-21 20:14:24] [INFO] [detector] Tải model thành công. Các nhãn: ['Fall-Detected']
+[2026-04-21 20:14:24] [WARNING] [detector] Không tìm thấy nhãn 'fire' trong model. Kiểm tra FIRE_CLASS_NAME.
+[2026-04-21 20:14:24] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-21 20:14:24] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-21 20:14:24] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-21 20:14:24] [INFO] [__main__] ==================================================
+[2026-04-21 20:14:42] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn [0] đang dùng backend: MSMF
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: 0
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-21 20:14:43] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:14:43] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-21 20:14:58] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG] 🔍 Phát hiện 1 stream chết: ['"D:\\Downloads\\app\\1.mp4"']
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\1.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\1.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-21 20:14:58] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-21 20:14:58] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"].
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-21 20:14:58] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:14:59] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-21 20:14:59] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-21 20:14:59] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-21 20:14:59] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"].
+[2026-04-21 20:14:59] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"].
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Phát hiện 7 stream chết: ['"D:\\Downloads\\app\\3.mp4"', '"D:\\Downloads\\Tạo_Video_Đám_Cháy_Công_Ty.mp4"', '"D:\\Downloads\\Tạo_Video_Lửa_Cháy.mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân.mp4"', '"D:\\Downloads\\Tạo_Video_Xe_và_Người.mp4"', '"D:\\Downloads\\Video_Công_Nhân_Đứng_Im_Giây.mp4"']
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\3.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\3.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-21 20:14:59] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:15:00] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-21 20:15:12] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-21 20:15:12] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t [0]...
+[2026-04-21 20:15:12] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False [0]
+[2026-04-21 20:15:12] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... [0]
+[2026-04-21 20:15:13] [INFO] [__main__] [DIAG-BG] â± cap.release() OK [0]
+[2026-04-21 20:36:51] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-21 20:36:57] [INFO] [__main__] ==================================================
+[2026-04-21 20:36:57] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 20:36:57 21/04/2026
+[2026-04-21 20:36:57] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-21 20:36:57] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-21 20:36:57] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-21 20:36:57] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-21 20:36:57] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-21 20:36:57] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-21 20:36:57] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-21 20:36:57] [INFO] [__main__] ==================================================
+[2026-04-21 20:37:34] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-21 20:37:35] [INFO] [__main__] 🎞️ Nguồn [0] đang dùng backend: MSMF
+[2026-04-21 20:37:35] [INFO] [__main__] ✅ Kết nối thành công: 0
+[2026-04-21 20:37:35] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:35] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-21 20:37:35] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:35] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-21 20:37:35] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:35] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-21 20:37:36] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:36] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-21 20:37:36] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:36] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-21 20:37:36] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:36] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-21 20:37:36] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:36] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-21 20:37:36] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-21 20:37:36] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-21 20:37:43] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-21 20:37:43] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-21 20:37:44] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"].
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Phát hiện 3 stream chết: ['"D:\\Downloads\\app\\1.mp4"', '"D:\\Downloads\\app\\3.mp4"', '"D:\\Downloads\\Tạo_Video_Đám_Cháy_Công_Ty.mp4"']
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\1.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\1.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\3.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\3.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-21 20:37:44] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:44] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-21 20:37:44] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-21 20:37:44] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"].
+[2026-04-21 20:37:44] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"].
+[2026-04-21 20:37:44] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Phát hiện 5 stream chết: ['"D:\\Downloads\\Tạo_Video_Lửa_Cháy.mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân.mp4"', '"D:\\Downloads\\Tạo_Video_Xe_và_Người.mp4"', '"D:\\Downloads\\Video_Công_Nhân_Đứng_Im_Giây.mp4"']
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] khỏi dict — main thread không bị block
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-21 20:37:45] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-21 20:38:37] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-21 20:38:37] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t [0]...
+[2026-04-21 20:38:37] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False [0]
+[2026-04-21 20:38:37] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... [0]
+[2026-04-21 20:38:37] [INFO] [__main__] [DIAG-BG] â± cap.release() OK [0]
+[2026-04-22 08:51:38] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-22 08:51:44] [INFO] [__main__] ==================================================
+[2026-04-22 08:51:44] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 08:51:44 22/04/2026
+[2026-04-22 08:51:44] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-22 08:51:44] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-22 08:51:44] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-22 08:51:45] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-22 08:51:45] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-22 08:51:45] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-22 08:51:45] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-22 08:51:45] [INFO] [__main__] ==================================================
+[2026-04-22 08:52:15] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:52:16] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:52:16] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-22 08:52:16] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:52:16] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-22 08:52:16] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:52:16] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-22 08:52:16] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:52:16] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-22 08:52:16] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:52:16] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-22 08:52:22] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\3.mp4"!
+[2026-04-22 08:52:22] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\app\3.mp4" (137 frames buffer)...
+[2026-04-22 08:52:22] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"!
+[2026-04-22 08:52:22] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4" (136 frames buffer)...
+[2026-04-22 08:52:22] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-22 08:52:22] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4" (150 frames buffer)...
+[2026-04-22 08:52:24] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Phát hiện 1 stream chết: ['"D:\\Downloads\\app\\1.mp4"']
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\1.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\1.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:52:24] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-22 08:52:24] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"].
+[2026-04-22 08:52:24] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-22 08:52:24] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Phát hiện 4 stream chết: ['"D:\\Downloads\\app\\3.mp4"', '"D:\\Downloads\\Tạo_Video_Đám_Cháy_Công_Ty.mp4"', '"D:\\Downloads\\Tạo_Video_Lửa_Cháy.mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"']
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\3.mp4"] — is_recording=True, rec_buffer=166, manual_rec=False
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (166 frames) cho "D:\Downloads\app\3.mp4"
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\app\3.mp4" (166 frames)
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\3.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_app_3_mp4_20260422_085224.avi (720x1280)
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] — is_recording=True, rec_buffer=165, manual_rec=False
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (165 frames) cho "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4" (165 frames)
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] — is_recording=True, rec_buffer=172, manual_rec=False
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_Tao_Video_am_Chay_Cong_Ty_mp4_20260422_085224.avi (1280x720)
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (172 frames) cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4" (172 frames)
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_Tao_Video_Lua_Chay_mp4_20260422_085224.avi (720x1280)
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 166 frames...
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 165 frames...
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 172 frames...
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:52:24] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\app\3.mp4"] đã gửi thành công
+[2026-04-22 08:52:24] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-22 08:52:24] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-22 08:52:24] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:52:24] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đã gửi thành công
+[2026-04-22 08:52:25] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_app_3_mp4_20260422_085224.avi (166 frames)
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ Đã lưu rec_buffer OK
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_Tao_Video_Lua_Chay_mp4_20260422_085224.avi (172 frames)
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ Đã lưu rec_buffer OK
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_Tao_Video_am_Chay_Cong_Ty_mp4_20260422_085224.avi (165 frames)
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ Đã lưu rec_buffer OK
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-22 08:52:25] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:53:34] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-22 08:53:34] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:53:34] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-22 08:54:00] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-22 08:54:01] [INFO] [__main__] 🔍 Thu nhỏ zoom: người dùng thu nhỏ
+[2026-04-22 08:54:07] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\3.mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\3.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]...
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-22 08:54:07] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-22 08:54:09] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-22 08:54:09] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:09] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-22 08:54:11] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-22 08:54:15] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\3.mp4"!
+[2026-04-22 08:54:15] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\app\3.mp4" (146 frames buffer)...
+[2026-04-22 08:54:15] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"!
+[2026-04-22 08:54:15] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4" (146 frames buffer)...
+[2026-04-22 08:54:16] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-22 08:54:16] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4" (150 frames buffer)...
+[2026-04-22 08:54:17] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"!
+[2026-04-22 08:54:17] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4" (150 frames buffer)...
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Phát hiện 3 stream chết: ['"D:\\Downloads\\app\\1.mp4"', '"D:\\Downloads\\app\\3.mp4"', '"D:\\Downloads\\Tạo_Video_Đám_Cháy_Công_Ty.mp4"']
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\1.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\1.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\3.mp4"] — is_recording=True, rec_buffer=163, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (163 frames) cho "D:\Downloads\app\3.mp4"
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\app\3.mp4" (163 frames)
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\3.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] — is_recording=True, rec_buffer=164, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_app_3_mp4_20260422_085417.avi (720x1280)
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Thu nhỏ zoom overlay...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 163 frames...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:17] [INFO] [__main__] 🔍 Thu nhỏ zoom: video ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đã kết thúc — tự động thu nhỏ
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã thu nhỏ zoom overlay OK
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (164 frames) cho "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4" (164 frames)
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_Tao_Video_am_Chay_Cong_Ty_mp4_20260422_085417.avi (1280x720)
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 164 frames...
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"].
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Phát hiện 5 stream chết: ['"D:\\Downloads\\Tạo_Video_Lửa_Cháy.mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân.mp4"', '"D:\\Downloads\\Tạo_Video_Xe_và_Người.mp4"', '"D:\\Downloads\\Video_Công_Nhân_Đứng_Im_Giây.mp4"']
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] — is_recording=True, rec_buffer=161, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (161 frames) cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4" (161 frames)
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_Tao_Video_Lua_Chay_mp4_20260422_085417.avi (720x1280)
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 161 frames...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] — is_recording=True, rec_buffer=154, manual_rec=False
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu lưu rec_buffer (154 frames) cho "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] khỏi dict — main thread không bị block
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4" (154 frames)
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_Video_Cong_Nhan_ung_Im_Giay_mp4_20260422_085417.avi (720x1280)
+[2026-04-22 08:54:17] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 154 frames...
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-22 08:54:18] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-22 08:54:18] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\app\3.mp4"] đã gửi thành công
+[2026-04-22 08:54:18] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:54:18] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đã gửi thành công
+[2026-04-22 08:54:18] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đã gửi thành công
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_app_3_mp4_20260422_085417.avi (163 frames)
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] ⏱ Đã lưu rec_buffer OK
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-22 08:54:18] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_Tao_Video_am_Chay_Cong_Ty_mp4_20260422_085417.avi (164 frames)
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ Đã lưu rec_buffer OK
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_Tao_Video_Lua_Chay_mp4_20260422_085417.avi (161 frames)
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ Đã lưu rec_buffer OK
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-SAVE] ✅ Đã lưu video tại: events\FIRE_D_Downloads_Video_Cong_Nhan_ung_Im_Giay_mp4_20260422_085417.avi (154 frames)
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ Đã lưu rec_buffer OK
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-22 08:54:19] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-22 08:54:19] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đã gửi thành công
+[2026-04-22 08:54:20] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:54:20] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:20] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-22 08:54:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-22 08:54:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-22 08:54:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-22 08:54:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-22 08:54:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-22 08:54:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-22 08:54:21] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-22 08:54:21] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-22 08:54:23] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-22 08:54:25] [INFO] [__main__] 🔍 Thu nhỏ zoom: người dùng thu nhỏ
+[2026-04-22 08:54:27] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\3.mp4"!
+[2026-04-22 08:54:27] [INFO] [telegram_notifier] Cooldown cho ["D:\Downloads\app\3.mp4"] còn 51.0s, bỏ qua.
+[2026-04-22 08:54:27] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\app\3.mp4" (147 frames buffer)...
+[2026-04-22 08:54:27] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"!
+[2026-04-22 08:54:27] [INFO] [telegram_notifier] Cooldown cho ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] còn 51.2s, bỏ qua.
+[2026-04-22 08:54:27] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4" (146 frames buffer)...
+[2026-04-22 08:54:27] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"!
+[2026-04-22 08:54:27] [INFO] [telegram_notifier] Cooldown cho ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] còn 50.8s, bỏ qua.
+[2026-04-22 08:54:27] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4" (150 frames buffer)...
+[2026-04-22 08:55:09] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-22 08:55:09] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-22 08:55:09] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:55:09] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:55:09] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-22 08:55:09] [INFO] [__main__] [Record] 🔴 Lưu video sự cố đang ghi dở do hệ thống dừng.
+[2026-04-22 08:55:09] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\app\3.mp4" (159 frames)
+[2026-04-22 08:55:09] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_app_3_mp4_20260422_085509.avi (720x1280)
+[2026-04-22 08:55:09] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 159 frames...
+[2026-04-22 12:37:47] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-22 12:37:53] [INFO] [__main__] ==================================================
+[2026-04-22 12:37:53] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 12:37:53 22/04/2026
+[2026-04-22 12:37:53] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-22 12:37:53] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-22 12:37:53] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-22 12:37:53] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-22 12:37:53] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-22 12:37:54] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-22 12:37:54] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-22 12:37:54] [INFO] [__main__] ==================================================
+[2026-04-22 12:38:45] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-26 15:51:30] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-26 15:51:37] [INFO] [__main__] ==================================================
+[2026-04-26 15:51:37] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 15:51:37 26/04/2026
+[2026-04-26 15:51:37] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-26 15:51:37] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-26 15:51:37] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-26 15:51:37] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-26 15:51:37] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-26 15:51:37] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-26 15:51:37] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-26 15:51:37] [INFO] [__main__] ==================================================
+[2026-04-26 15:51:51] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-26 15:51:52] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:51:52] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-26 15:52:00] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\1.mp4"].
+[2026-04-26 15:52:00] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\app\3.mp4"].
+[2026-04-26 15:52:00] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"].
+[2026-04-26 15:52:00] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"].
+[2026-04-26 15:52:00] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"].
+[2026-04-26 15:52:00] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"].
+[2026-04-26 15:52:00] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"].
+[2026-04-26 15:52:01] [INFO] [__main__] 🎬 Phát hết video ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"].
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Phát hiện 8 stream chết: ['"D:\\Downloads\\app\\1.mp4"', '"D:\\Downloads\\app\\3.mp4"', '"D:\\Downloads\\Tạo_Video_Đám_Cháy_Công_Ty.mp4"', '"D:\\Downloads\\Tạo_Video_Lửa_Cháy.mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"', '"D:\\Downloads\\Tạo_video_lửa_cháy_và_công_nhân.mp4"', '"D:\\Downloads\\Tạo_Video_Xe_và_Người.mp4"', '"D:\\Downloads\\Video_Công_Nhân_Đứng_Im_Giây.mp4"']
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\1.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\1.mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\app\3.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\app\3.mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Cleanup stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] — is_recording=False, rec_buffer=0, manual_rec=False
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ Bắt đầu cap.release()...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Đã del stream ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] khỏi dict — main thread không bị block
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG] 🔍 Bắt đầu _refresh_camera_list...
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-26 15:52:01] [INFO] [__main__] [DIAG-BG] ⏱ cap.release() OK
+[2026-04-26 15:52:02] [INFO] [__main__] [DIAG] 🔍 _refresh_camera_list OK
+[2026-04-26 15:52:02] [INFO] [__main__] ⌛ Tất cả camera đã ngắt, dừng hệ thống.
+[2026-04-26 15:52:02] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-26 15:52:07] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-26 15:52:07] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:07] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-26 15:52:07] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\3.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\3.mp4"
+[2026-04-26 15:52:08] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"
+[2026-04-26 15:52:08] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"
+[2026-04-26 15:52:08] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"
+[2026-04-26 15:52:08] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"
+[2026-04-26 15:52:08] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Tạo_Video_Xe_và_Người.mp4"
+[2026-04-26 15:52:08] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:52:08] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"
+[2026-04-26 15:52:44] [INFO] [__main__] 🔍 Phóng to video toàn khung hình bằng Overlay
+[2026-04-26 15:52:49] [INFO] [__main__] 🔍 Thu nhỏ zoom: người dùng thu nhỏ
+[2026-04-26 15:52:52] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\3.mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\3.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\3.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\3.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Tạo_Video_Xe_và_Người.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]...
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-26 15:52:52] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"]
+[2026-04-26 15:58:45] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-26 15:58:58] [INFO] [__main__] ==================================================
+[2026-04-26 15:58:58] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 15:58:58 26/04/2026
+[2026-04-26 15:58:58] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-26 15:58:58] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-26 15:58:58] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-26 15:58:58] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-26 15:58:58] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-26 15:58:58] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-26 15:58:58] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-26 15:58:58] [INFO] [__main__] ==================================================
+[2026-04-26 15:59:01] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-26 15:59:02] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-26 15:59:02] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-26 15:59:30] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-26 15:59:30] [INFO] [__main__] [DIAG-BG] â± Chá» capture thread thoÃ¡t ["D:\Downloads\app\1.mp4"]...
+[2026-04-26 15:59:30] [INFO] [__main__] [DIAG-BG] â± Capture thread alive=False ["D:\Downloads\app\1.mp4"]
+[2026-04-26 15:59:30] [INFO] [__main__] [DIAG-BG] â± Báº¯t Ä‘áº§u cap.release()... ["D:\Downloads\app\1.mp4"]
+[2026-04-26 15:59:30] [INFO] [__main__] [DIAG-BG] â± cap.release() OK ["D:\Downloads\app\1.mp4"]
+[2026-04-27 10:47:50] [INFO] [root] ✅ Hệ thống Logging chuyên nghiệp đã được khởi tạo.
+[2026-04-27 10:47:56] [INFO] [__main__] ==================================================
+[2026-04-27 10:47:56] [INFO] [__main__] 🔐 Đăng nhập thành công: admin @ 10:47:56 27/04/2026
+[2026-04-27 10:47:56] [INFO] [__main__] ✅ Giao diện Camera AI đã khởi động
+[2026-04-27 10:47:56] [INFO] [__main__] ⏳ Đang nạp model YOLO...
+[2026-04-27 10:47:56] [INFO] [detector] Đang tải model từ: C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\weights\best.pt
+[2026-04-27 10:47:56] [INFO] [detector] Tải model thành công. Các nhãn: ['barcode', 'car', 'cardboard box', 'fire', 'forklift', 'freight container', 'gloves', 'helmet', 'ladder', 'license plate', 'person', 'qr code', 'road sign', 'safety vest', 'smoke', 'traffic cone', 'traffic light', 'truck', 'van', 'wood pallet']
+[2026-04-27 10:47:56] [INFO] [telegram_notifier] Telegram Bot sẵn sàng. Chat ID: 537019223
+[2026-04-27 10:47:56] [WARNING] [telegram_notifier] ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 10:47:56] [INFO] [__main__] ✅ Model AI đã sẵn sàng!
+[2026-04-27 10:47:56] [INFO] [__main__] ==================================================
+[2026-04-27 10:48:00] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 10:48:00] [INFO] [__main__] 🎞️ Nguồn ["D:\Downloads\app\1.mp4"] đang dùng backend: FFMPEG
+[2026-04-27 10:48:00] [INFO] [__main__] ✅ Kết nối thành công: "D:\Downloads\app\1.mp4"
+[2026-04-27 10:48:13] [INFO] [__main__] 🔥 ĐÁM CHÁY XÁC NHẬN TẠI "D:\Downloads\app\1.mp4"!
+[2026-04-27 10:48:13] [INFO] [__main__] [Record] 🔴 Bắt đầu ghi hình sự cố cho "D:\Downloads\app\1.mp4" (139 frames buffer)...
+[2026-04-27 10:48:16] [INFO] [telegram_notifier] ✅ Cảnh báo Telegram cho ["D:\Downloads\app\1.mp4"] đã gửi thành công
+[2026-04-27 10:48:19] [INFO] [__main__] ⏹  Đang dừng toàn bộ camera...
+[2026-04-27 10:48:19] [INFO] [__main__] [Record] 🔴 Lưu video sự cố đang ghi dở do hệ thống dừng.
+[2026-04-27 10:48:19] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu _save_event_video: "D:\Downloads\app\1.mp4" (140 frames)
+[2026-04-27 10:48:19] [INFO] [__main__] [DIAG-SAVE] ⏱ Tạo VideoWriter: events\FIRE_D_Downloads_app_1_mp4_20260427_104819.avi (720x1280)
+[2026-04-27 10:48:19] [INFO] [__main__] [DIAG-SAVE] ⏱ Bắt đầu ghi 140 frames...

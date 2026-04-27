@@ -1,3 +1,11 @@
 [2026-04-21 11:16:45] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
 [2026-04-21 15:24:29] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
 [2026-04-21 15:25:37] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-21 20:14:24] [WARNING] [MainThread] [detector:detector.py:61] - Không tìm thấy nhãn 'fire' trong model. Kiểm tra FIRE_CLASS_NAME.
+[2026-04-21 20:14:24] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-21 20:36:57] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-22 08:51:45] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-22 12:37:54] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-26 15:51:37] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-26 15:58:58] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-04-27 10:47:56] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!

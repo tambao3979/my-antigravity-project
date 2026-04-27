@@ -21,6 +21,7 @@ class FireTracker:
 
     def __init__(self):
         self._start_time: Optional[float] = None
+        self._last_seen_time: Optional[float] = None
         self._confirmed: bool = False
         self._pause_time: Optional[float] = None
 
@@ -46,8 +47,12 @@ class FireTracker:
     def resume(self):
         """Tiếp tục đếm ngược"""
         if self._pause_time is not None:
+            now = time.time()
+            paused_duration = now - self._pause_time
             if self._start_time is not None:
-                self._start_time += (time.time() - self._pause_time)
+                self._start_time += paused_duration
+            if self._last_seen_time is not None:
+                self._last_seen_time += paused_duration
             self._pause_time = None
 
     @property
@@ -72,27 +77,34 @@ class FireTracker:
         Returns:
             True nếu đây là thời điểm xác nhận cháy (lần đầu đủ 5 giây)
         """
+        now = time.time()
         fire_detected = any(d.is_fire for d in detections)
 
         if fire_detected:
+            self._last_seen_time = now
             if self._start_time is None:
                 # Bắt đầu đếm
-                self._start_time = time.time()
+                self._start_time = now
                 self._confirmed = False
 
             if self.elapsed >= Config.FIRE_CONFIRM_SECONDS and not self._confirmed:
                 self._confirmed = True
                 return True  # 🔥 Xác nhận cháy!
-        else:
+        elif self._start_time is not None:
+            last_seen = self._last_seen_time or self._start_time
+            missing_for = now - last_seen
+            if missing_for <= Config.FIRE_MISSING_GRACE_SECONDS:
+                return False
+
             # Lửa biến mất → reset
-            self._start_time = None
-            self._confirmed = False
+            self.reset()
 
         return False
 
     def reset(self):
         """Reset toàn bộ trạng thái tracker"""
         self._start_time = None
+        self._last_seen_time = None
         self._confirmed = False
 
     def get_fire_detections(self, detections: List[Detection]) -> List[Detection]:
