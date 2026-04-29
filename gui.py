@@ -19,6 +19,9 @@ import customtkinter as ctk
 import numpy as np
 from PIL import Image, ImageTk
 
+from alerts import AlertManager
+from auth import AuthenticatedUser, AuthService, Permission, Role
+from camera_health import CameraHealthState, CameraHealthWatchdog, ExponentialBackoff
 from config import Config
 from logger_config import setup_logging
 from detector import ObjectDetector
@@ -53,9 +56,6 @@ CLR_CAM_IDLE    = "#2a2d3e"
 # ─────────────────────────────────────────────────────────────
 #  APP CONSTANTS (extracted from magic numbers)
 # ─────────────────────────────────────────────────────────────
-MAX_RECONNECT_RETRIES = 5          # Số lần retry tối đa khi camera mất kết nối
-RECONNECT_DELAY_SEC = 3            # Delay giữa các lần reconnect
-
 RING_BUFFER_SIZE = 150             # ~5 giây buffer ở 30fps
 RECORD_FUTURE_FRAMES = 150        # ~5 giây ghi thêm sau sự cố
 RECORD_FPS = 30.0                  # FPS khi ghi video sự cố
@@ -66,9 +66,6 @@ IDLE_RENDER_INTERVAL_MS = 50       # Render interval khi idle
 MIN_CELL_WIDTH = 200               # Chiều rộng tối thiểu mỗi camera cell
 SIDE_PANEL_TOTAL_WIDTH = 550       # Ước tính tổng width 2 side panel
 
-# Login credentials
-LOGIN_USERNAME = "admin"
-LOGIN_PASSWORD = "admin"
 MAX_LOGIN_ATTEMPTS = 3
 LOGIN_LOCKOUT_SECONDS = 5
 
@@ -136,6 +133,8 @@ class LoginApp(ctk.CTk):
                 pass
 
         self.authenticated = False
+        self.authenticated_user: Optional[AuthenticatedUser] = None
+        self.auth_service = AuthService.from_config(Config)
         self._attempts = 0
         self._locked_until = 0.0
 
@@ -213,8 +212,10 @@ class LoginApp(ctk.CTk):
         username = self.entry_user.get().strip()
         password = self.entry_pass.get().strip()
 
-        if username == LOGIN_USERNAME and password == LOGIN_PASSWORD:
+        authenticated_user = self.auth_service.authenticate(username, password)
+        if authenticated_user is not None:
             self.authenticated = True
+            self.authenticated_user = authenticated_user
             self.destroy()   # Thoát mainloop login một cách sạch — không có 'zero window' vì đây là root
         else:
             self._attempts += 1
@@ -252,6 +253,14 @@ class CameraStream:
         self.is_running = False
         self.thread: Optional[threading.Thread] = None
         self.tracker = FireTracker()
+        self.health = CameraHealthState(self.source_str, self.display_name)
+        self._reconnect_backoff = ExponentialBackoff(
+            Config.CAMERA_RECONNECT_BASE_DELAY_SECONDS,
+            Config.CAMERA_RECONNECT_MAX_DELAY_SECONDS,
+        )
+        self._stop_event = threading.Event()
+        self._capture_lock = threading.Lock()
+        self._src_val = None
         
         self.latest_frame: Optional[np.ndarray] = None
         self.latest_detections: list = []
@@ -332,43 +341,117 @@ class CameraStream:
 
     def start(self):
         src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
+        self._src_val = src_val
+        self._stop_event.clear()
         self.cap = self._open_capture(src_val)
         if self.cap is None:
             logger.error("Không thể mở nguồn: %s", self.source)
-            self.cap = None
-            return False
+            self.health.mark_disconnected("Unable to open camera source")
+            self.has_error = True
+            self.error_message = "Unable to open camera source; waiting to reconnect..."
+            if self.is_video_file:
+                self.cap = None
+                return False
 
-        self.video_fps = RECORD_FPS
-        if self.is_video_file:
-            fps = self.cap.get(cv2.CAP_PROP_FPS)
-            if fps > 0:
-                self.video_fps = fps
-        self.frame_delay = 1.0 / self.video_fps
-        if Config.FRAME_WIDTH > 0:
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, Config.FRAME_WIDTH)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, Config.FRAME_HEIGHT)
+        if self.cap is not None:
+            self._configure_capture()
+            self.health.mark_connected()
 
         self.is_running = True
         self.reconnect_count = 0
-        self.has_error = False
-        self.error_message = ""
+        if self.cap is not None:
+            self.has_error = False
+            self.error_message = ""
         self.ended = False
         self.tracker.reset()
         self.thread = threading.Thread(target=self._capture_loop, daemon=True)
         self.thread.start()
-        logger.info("✅ Kết nối thành công: %s", self.source)
+        if self.cap is not None:
+            logger.info("✅ Kết nối thành công: %s", self.source)
+        else:
+            logger.warning("Camera [%s] started in reconnect mode.", self.source)
         return True
+
+    def _configure_capture(self):
+        self.video_fps = RECORD_FPS
+        if self.cap is not None and self.is_video_file:
+            fps = self.cap.get(cv2.CAP_PROP_FPS)
+            if fps > 0:
+                self.video_fps = fps
+        self.frame_delay = 1.0 / self.video_fps
+        if self.cap is not None and Config.FRAME_WIDTH > 0:
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, Config.FRAME_WIDTH)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, Config.FRAME_HEIGHT)
+
+    def health_snapshot(self, now: Optional[float] = None):
+        return self.health.snapshot(now)
+
+    def _release_capture(self):
+        with self._capture_lock:
+            cap = self.cap
+            self.cap = None
+        if cap is not None:
+            try:
+                cap.release()
+            except Exception:
+                pass
+
+    def _mark_disconnected(self, reason: str):
+        self.health.mark_disconnected(reason)
+        self.has_error = True
+        self.error_message = reason
+
+    def _attempt_reconnect(self, reason: str):
+        if not self.is_running or self.is_video_file:
+            return
+
+        self._mark_disconnected(reason)
+        self._release_capture()
+        attempt = self.health.record_reconnect_attempt()
+        self.reconnect_count = attempt
+        delay = self._reconnect_backoff.next_delay()
+        self.error_message = f"Disconnected. Reconnect attempt {attempt} in {delay:.1f}s..."
+        logger.warning("[%s] %s", self.source, self.error_message)
+
+        if self._stop_event.wait(delay):
+            return
+
+        cap = self._open_capture(self._src_val)
+        if cap is None:
+            self.error_message = f"Reconnect attempt {attempt} failed; retrying..."
+            logger.warning("[%s] %s", self.source, self.error_message)
+            return
+
+        with self._capture_lock:
+            self.cap = cap
+        self._configure_capture()
+        self.health.mark_connected()
+        self._reconnect_backoff.reset()
+        self.reconnect_count = 0
+        self.has_error = False
+        self.error_message = ""
+        logger.info("Camera [%s] reconnected successfully.", self.source)
 
     def _capture_loop(self):
         last_read_time = time.time()
-        while self.is_running and self.cap is not None:
+        while self.is_running:
             if self.is_paused:
                 time.sleep(0.05)
                 if not self.is_video_file:
-                    self.cap.grab()
+                    with self._capture_lock:
+                        cap = self.cap
+                    if cap is not None:
+                        cap.grab()
                 continue
-                
-            ret, frame = self.cap.read()
+
+            with self._capture_lock:
+                cap = self.cap
+
+            if cap is None:
+                self._attempt_reconnect("Camera capture is not connected")
+                continue
+
+            ret, frame = cap.read()
             if not ret:
                 if self.is_video_file:
                     logger.info("🎬 Phát hết video [%s].", self.source)
@@ -376,23 +459,7 @@ class CameraStream:
                     self.is_running = False
                     break
 
-                # Reconnect với retry limit
-                self.reconnect_count += 1
-                if self.reconnect_count > MAX_RECONNECT_RETRIES:
-                    self.has_error = True
-                    self.error_message = f"Mất kết nối sau {MAX_RECONNECT_RETRIES} lần thử"
-                    logger.error("❌ [%s] Ngắt kết nối vĩnh viễn sau %d lần retry.", self.source, MAX_RECONNECT_RETRIES)
-                    self.is_running = False
-                    break
-
-                self.has_error = True
-                self.error_message = f"Đang thử kết nối lại ({self.reconnect_count}/{MAX_RECONNECT_RETRIES})..."
-                logger.warning("⚠️ [%s] Mất kết nối. Thử lại %d/%d sau %ds...", self.source, self.reconnect_count, MAX_RECONNECT_RETRIES, RECONNECT_DELAY_SEC)
-                time.sleep(RECONNECT_DELAY_SEC)
-                if self.cap:
-                    self.cap.release()
-                src_val = int(self.source) if self.source.isdigit() else self.source.strip('"').strip("'")
-                self.cap = self._open_capture(src_val)
+                self._attempt_reconnect("Camera read failed")
                 continue
 
             # Reset error state khi đọc frame thành công
@@ -400,6 +467,8 @@ class CameraStream:
                 self.has_error = False
                 self.error_message = ""
                 self.reconnect_count = 0
+                self.health.mark_connected()
+                self._reconnect_backoff.reset()
                 logger.info("✅ [%s] Kết nối lại thành công!", self.source)
 
             # Giới hạn kích thước frame để tránh tràn RAM (OOM)
@@ -432,21 +501,23 @@ class CameraStream:
 
     def stop(self):
         self.is_running = False
+        self._stop_event.set()
         if self.thread and self.thread.is_alive():
             self.thread.join(timeout=1.0)
-        if self.cap:
-            self.cap.release()
-            self.cap = None
+        self._release_capture()
         self.thread = None
 
 
 class SecurityApp(ctk.CTk):
 
-    def __init__(self):
+    def __init__(self, current_user: Optional[AuthenticatedUser] = None):
         super().__init__()
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
         self.configure(fg_color=CLR_BG)
+        self.current_user = current_user or AuthenticatedUser(Config.AUTH_ADMIN_USERNAME, Role.ADMIN)
+        self._admin_only_widgets: list = []
+        self._building_ui = True
 
         self.title("🔥 Camera AI – Hệ Thống Giám Sát")
         self.geometry("1400x820")
@@ -487,6 +558,13 @@ class SecurityApp(ctk.CTk):
         self._last_zoom_image = None  # Giữ reference CTkImage tránh GC sớm gây check_dpi_scaling crash
         self._ui_log_queue: "queue.SimpleQueue[str]" = queue.SimpleQueue()
         self._resource_metrics_queue: "queue.Queue[ResourceMetrics]" = queue.Queue(maxsize=1)
+        self._alert_events: list = []
+        self.alert_manager = AlertManager.from_config(Config, event_sink=self._on_alert_event)
+        self.camera_health_watchdog = CameraHealthWatchdog(
+            streams_provider=lambda: list(self.streams.values()),
+            alert_manager=self.alert_manager,
+            check_interval_seconds=Config.CAMERA_HEALTH_CHECK_INTERVAL_SECONDS,
+        )
         self._display_maps: Dict[str, dict] = {}
         self._count_history: list[dict] = []
         self._last_count_sample = 0.0
@@ -538,6 +616,8 @@ class SecurityApp(ctk.CTk):
         self._build_video_panel()
         self._build_right_panel()
         self._build_status_bar()
+        self._building_ui = False
+        self._apply_rbac_to_controls()
 
         # Gắn Handler giao diện để xem log trên app (tạo Log Box)
         # Các stream Logging chuẩn đã được xử lý bởi setup_logging gốc
@@ -552,11 +632,18 @@ class SecurityApp(ctk.CTk):
         self.after(500, self._drain_resource_metrics_queue)
 
         logger.info("=" * 50)
-        logger.info("🔐 Đăng nhập thành công: %s @ %s", LOGIN_USERNAME, datetime.now().strftime("%H:%M:%S %d/%m/%Y"))
+        logger.info(
+            "Login succeeded: %s (%s) @ %s",
+            self.current_user.username,
+            self.current_user.role.value,
+            datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
+        )
         logger.info("✅ Giao diện Camera AI đã khởi động")
         if self.system_monitor_agent:
             self.system_monitor_agent.start()
             logger.info("SystemMonitorAgent running in background, interval %.1fs", Config.RESOURCE_MONITOR_INTERVAL_SECONDS)
+        self.camera_health_watchdog.start()
+        logger.info("CameraHealthWatchdog running in background, interval %.1fs", Config.CAMERA_HEALTH_CHECK_INTERVAL_SECONDS)
         logger.info("⏳ Đang nạp model YOLO...")
         self.detector = ObjectDetector()
         self.notifier = TelegramNotifier()
@@ -638,9 +725,11 @@ class SecurityApp(ctk.CTk):
 
         self.add_cam_entry = ctk.CTkEntry(add_frame, placeholder_text="ID / File / RTSP...", fg_color="#2a2d3e", border_color=CLR_BORDER, text_color=CLR_TEXT, font=ctk.CTkFont(size=12))
         self.add_cam_entry.grid(row=0, column=0, padx=8, pady=(8, 4), sticky="ew")
+        self._remember_admin_widget(self.add_cam_entry)
 
         self.btn_add_cam = ctk.CTkButton(add_frame, text="+ Thêm Camera", height=30, fg_color=CLR_ACCENT, hover_color=CLR_ACCENT_DARK, font=ctk.CTkFont(size=12, weight="bold"), corner_radius=6, command=self._add_camera)
         self.btn_add_cam.grid(row=1, column=0, padx=8, pady=(0, 8), sticky="ew")
+        self._remember_admin_widget(self.btn_add_cam)
 
         self.camera_list_frame = ctk.CTkScrollableFrame(panel, fg_color="transparent", corner_radius=8)
         self.camera_list_frame.grid(row=3, column=0, padx=8, pady=4, sticky="nsew")
@@ -682,6 +771,7 @@ class SecurityApp(ctk.CTk):
             text_color=CLR_TEXT, font=ctk.CTkFont(size=11), show="•"
         )
         self.zalo_token_entry.grid(row=0, column=0, sticky="ew")
+        self._remember_admin_widget(self.zalo_token_entry)
         ctk.CTkButton(
             entry_row_token, text="✕", width=28, height=28,
             fg_color="#3a1a1a", hover_color=CLR_RED,
@@ -703,6 +793,7 @@ class SecurityApp(ctk.CTk):
             text_color=CLR_TEXT, font=ctk.CTkFont(size=11)
         )
         self.zalo_uid_entry.grid(row=0, column=0, sticky="ew")
+        self._remember_admin_widget(self.zalo_uid_entry)
         ctk.CTkButton(
             entry_row_uid, text="✕", width=28, height=28,
             fg_color="#3a1a1a", hover_color=CLR_RED,
@@ -723,6 +814,7 @@ class SecurityApp(ctk.CTk):
             command=self._save_api_config
         )
         self.btn_save_api.grid(row=0, column=0, padx=(0, 3), sticky="ew")
+        self._remember_admin_widget(self.btn_save_api)
 
         ctk.CTkButton(
             btn_row, text="🗑 Xóa API", height=30,
@@ -739,6 +831,8 @@ class SecurityApp(ctk.CTk):
 
     def _save_api_config(self):
         """Lưu Zalo OA Token + User ID vào file cấu hình bền vững và nạp lại runtime."""
+        if not self._require_permission(Permission.MANAGE_CONFIG, "save API configuration"):
+            return
         new_token = self.zalo_token_entry.get().strip()
         new_uid   = self.zalo_uid_entry.get().strip()
 
@@ -762,6 +856,8 @@ class SecurityApp(ctk.CTk):
 
     def _clear_api_field(self, entry: ctk.CTkEntry, env_key: str):
         """Xóa nội dung 1 ô nhập và ghi đè giá trị rỗng vào cấu hình bền vững."""
+        if not self._require_permission(Permission.MANAGE_CONFIG, f"clear {env_key}"):
+            return
         entry.delete(0, "end")
         if env_key == "ZALO_OA_TOKEN":
             Config.ZALO_OA_TOKEN = ""
@@ -775,6 +871,8 @@ class SecurityApp(ctk.CTk):
 
     def _clear_all_api(self):
         """Xóa toàn bộ Zalo API (token + user ID)."""
+        if not self._require_permission(Permission.MANAGE_CONFIG, "clear all API configuration"):
+            return
         self._clear_api_field(self.zalo_token_entry, "ZALO_OA_TOKEN")
         self._clear_api_field(self.zalo_uid_entry,   "ZALO_USER_ID")
         logger.info("🗑 Đã xóa toàn bộ Zalo API.")
@@ -854,6 +952,11 @@ class SecurityApp(ctk.CTk):
 
         if latest is not None:
             self._update_resource_stats(latest)
+            if latest.gpu.available:
+                self.alert_manager.record_gpu_sample(
+                    latest.gpu.utilization_percent,
+                    now=latest.timestamp,
+                )
 
         try:
             if self.winfo_exists():
@@ -905,6 +1008,7 @@ class SecurityApp(ctk.CTk):
             text_color=CLR_TEXT, font=ctk.CTkFont(size=12, weight="bold")
         )
         self.config_target_menu.grid(row=5, column=0, padx=12, pady=(0, 6), sticky="ew")
+        self._remember_admin_widget(self.config_target_menu)
         
         thresh_frame = ctk.CTkFrame(panel, fg_color=CLR_PANEL2, corner_radius=8)
         thresh_frame.grid(row=6, column=0, padx=12, pady=(0, 4), sticky="ew")
@@ -920,6 +1024,7 @@ class SecurityApp(ctk.CTk):
         self.slider_fire = ctk.CTkSlider(thresh_frame, from_=0.01, to=0.75, number_of_steps=74, height=12, button_color=CLR_RED, progress_color=CLR_RED, command=self._on_threshold_change)
         self.slider_fire.set(Config.FIRE_CONFIDENCE_THRESHOLD)
         self.slider_fire.grid(row=1, column=0, padx=8, pady=(0, 6), sticky="ew")
+        self._remember_admin_widget(self.slider_fire)
         self.lbl_val_fire.configure(text=f"{int(self.slider_fire.get()*100)}%")
 
         # Default Object Slider
@@ -932,6 +1037,7 @@ class SecurityApp(ctk.CTk):
         self.slider_def = ctk.CTkSlider(thresh_frame, from_=0.15, to=0.85, number_of_steps=70, height=12, button_color=CLR_ACCENT, progress_color=CLR_ACCENT, command=self._on_threshold_change)
         self.slider_def.set(Config.CONFIDENCE_THRESHOLD)
         self.slider_def.grid(row=3, column=0, padx=8, pady=(0, 8), sticky="ew")
+        self._remember_admin_widget(self.slider_def)
         self.lbl_val_def.configure(text=f"{int(self.slider_def.get()*100)}%")
 
         hdr_iou = ctk.CTkFrame(thresh_frame, fg_color="transparent")
@@ -943,19 +1049,22 @@ class SecurityApp(ctk.CTk):
         self.slider_iou = ctk.CTkSlider(thresh_frame, from_=0.30, to=0.95, number_of_steps=65, height=12, button_color=CLR_GREEN, progress_color=CLR_GREEN, command=self._on_threshold_change)
         self.slider_iou.set(Config.YOLO_IOU)
         self.slider_iou.grid(row=5, column=0, padx=8, pady=(0, 8), sticky="ew")
+        self._remember_admin_widget(self.slider_iou)
         self.lbl_val_iou.configure(text=f"{int(self.slider_iou.get()*100)}%")
 
         roi_row = ctk.CTkFrame(thresh_frame, fg_color="transparent")
         roi_row.grid(row=6, column=0, sticky="ew", padx=8, pady=(0, 8))
         roi_row.grid_columnconfigure(0, weight=1)
-        ctk.CTkSwitch(
+        self.roi_switch = ctk.CTkSwitch(
             roi_row,
             text="ROI",
             variable=self.roi_mode_var,
             font=ctk.CTkFont(size=10, weight="bold"),
             command=self._on_roi_mode_change,
-        ).grid(row=0, column=0, sticky="w")
-        ctk.CTkButton(
+        )
+        self.roi_switch.grid(row=0, column=0, sticky="w")
+        self._remember_admin_widget(self.roi_switch)
+        self.btn_clear_roi = ctk.CTkButton(
             roi_row,
             text="Clear",
             width=54,
@@ -964,7 +1073,9 @@ class SecurityApp(ctk.CTk):
             hover_color="#3a3d4e",
             font=ctk.CTkFont(size=10, weight="bold"),
             command=self._clear_roi_for_target,
-        ).grid(row=0, column=1, sticky="e")
+        )
+        self.btn_clear_roi.grid(row=0, column=1, sticky="e")
+        self._remember_admin_widget(self.btn_clear_roi)
 
 
         ctk.CTkLabel(panel, text="📋  NHẬT KÝ SỰ KIỆN", font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT_DIM).grid(row=7, column=0, padx=14, pady=(8, 6), sticky="w")
@@ -1014,6 +1125,43 @@ class SecurityApp(ctk.CTk):
         lbl = ctk.CTkLabel(card, text=value, font=ctk.CTkFont(size=value_size, weight="bold"), text_color=color)
         lbl.grid(row=1, column=0, pady=(0, 6))
         return lbl
+
+    def _on_alert_event(self, event):
+        self._alert_events.append(event)
+        if len(self._alert_events) > 500:
+            del self._alert_events[:100]
+
+    def _has_permission(self, permission: Permission) -> bool:
+        return self.current_user.can(permission)
+
+    def _require_permission(self, permission: Permission, action_name: str) -> bool:
+        if self._has_permission(permission):
+            return True
+        logger.warning(
+            "RBAC denied %s for user %s (%s)",
+            action_name,
+            self.current_user.username,
+            self.current_user.role.value,
+        )
+        return False
+
+    def _remember_admin_widget(self, widget):
+        self._admin_only_widgets.append(widget)
+        return widget
+
+    def _apply_rbac_to_controls(self):
+        if self._has_permission(Permission.MANAGE_CONFIG):
+            return
+        for widget in self._admin_only_widgets:
+            try:
+                widget.configure(state="disabled")
+            except Exception:
+                pass
+        logger.info(
+            "RBAC read-only mode active for user %s (%s)",
+            self.current_user.username,
+            self.current_user.role.value,
+        )
 
     def _update_resource_stats(self, metrics: ResourceMetrics):
         system = metrics.system
@@ -1078,6 +1226,8 @@ class SecurityApp(ctk.CTk):
 
     def _on_threshold_change(self, value=None):
         if not hasattr(self, 'camera_configs'): return
+        if not getattr(self, "_building_ui", False) and not self._require_permission(Permission.MANAGE_CONFIG, "change model thresholds"):
+            return
         
         fire_conf = self.slider_fire.get()
         def_conf = self.slider_def.get()
@@ -1102,6 +1252,9 @@ class SecurityApp(ctk.CTk):
                     cfg["iou"] = iou
 
     def _on_roi_mode_change(self):
+        if not self._require_permission(Permission.MANAGE_CONFIG, "change ROI mode"):
+            self.roi_mode_var.set(False)
+            return
         if self.roi_mode_var.get():
             logger.info("ROI edit mode enabled. Left-click video to add/move points; right-click to remove.")
         else:
@@ -1110,6 +1263,8 @@ class SecurityApp(ctk.CTk):
             logger.info("ROI edit mode disabled.")
 
     def _clear_roi_for_target(self):
+        if not self._require_permission(Permission.MANAGE_CONFIG, "clear ROI"):
+            return
         target = self.config_target_var.get()
         targets = self.streams.values() if target == "Tất cả Camera" else [self.streams.get(target)]
         cleared = 0
@@ -1127,6 +1282,9 @@ class SecurityApp(ctk.CTk):
     # ════════════════════════════════════════════════════════
 
     def _on_class_visibility_change(self, class_name: str, var: ctk.BooleanVar):
+        if not self._require_permission(Permission.MANAGE_CONFIG, f"change visibility for {class_name}"):
+            var.set(not var.get())
+            return
         target = self.config_target_var.get()
         if target in self.camera_configs:
             self.camera_configs[target]["class_visibility"][class_name] = var.get()
@@ -1161,6 +1319,12 @@ class SecurityApp(ctk.CTk):
         ctk.CTkLabel(row_f, text=class_name.upper(), font=ctk.CTkFont(size=11, weight="bold"), text_color=CLR_TEXT, anchor="w").grid(row=0, column=1, padx=2, pady=4, sticky="ew")
         cb = ctk.CTkCheckBox(row_f, text="", variable=var, width=30, checkbox_width=18, checkbox_height=18, fg_color=CLR_ACCENT, hover_color=CLR_ACCENT_DARK, border_color=CLR_BORDER, corner_radius=4, command=lambda c=class_name, v=var: self._on_class_visibility_change(c, v))
         cb.grid(row=0, column=2, padx=(4, 8), pady=4)
+        self._remember_admin_widget(cb)
+        if not self._has_permission(Permission.MANAGE_CONFIG) and not self._building_ui:
+            try:
+                cb.configure(state="disabled")
+            except Exception:
+                pass
 
     def _is_class_visible(self, class_name: str) -> bool:
         return self.class_visibility.get(class_name, ctk.BooleanVar(value=True)).get()
@@ -1221,8 +1385,15 @@ class SecurityApp(ctk.CTk):
                                     text_color=CLR_TEXT_DIM, font=ctk.CTkFont(size=10),
                                     command=lambda s=src: self._remove_camera(s))
             btn_del.grid(row=0, column=3, padx=(0, 6), pady=6)
+            if not self._has_permission(Permission.MANAGE_CONFIG):
+                try:
+                    btn_del.configure(state="disabled")
+                except Exception:
+                    pass
 
     def _remove_camera(self, src: str):
+        if not self._require_permission(Permission.MANAGE_CONFIG, "remove camera"):
+            return
         if src in self.camera_sources:
             self.camera_sources.remove(src)
             if src in self.active_sources_vars:
@@ -1239,6 +1410,8 @@ class SecurityApp(ctk.CTk):
             logger.info("❌ Đã xóa camera: %s", src)
 
     def _add_camera(self):
+        if not self._require_permission(Permission.MANAGE_CONFIG, "add camera"):
+            return
         src = self.add_cam_entry.get().strip()
         if src and src not in self.camera_sources:
             self.camera_sources.append(src)
@@ -1262,6 +1435,8 @@ class SecurityApp(ctk.CTk):
 
     def _toggle_manual_record(self, src: str):
         """Bật/tắt ghi hình thủ công cho camera cụ thể."""
+        if not self._require_permission(Permission.MANAGE_CONFIG, "manual recording"):
+            return
         stream = self.streams.get(src)
         if not stream or not stream.is_running:
             return
@@ -1346,6 +1521,8 @@ class SecurityApp(ctk.CTk):
         if not self.roi_mode_var.get():
             self._toggle_zoom(src)
             return
+        if not self._require_permission(Permission.MANAGE_CONFIG, "edit ROI"):
+            return
 
         stream = self.streams.get(src)
         point = self._event_to_frame_point(event, src)
@@ -1365,6 +1542,8 @@ class SecurityApp(ctk.CTk):
     def _on_video_drag(self, event, src: str):
         if not src or not self.roi_mode_var.get():
             return
+        if not self._require_permission(Permission.MANAGE_CONFIG, "edit ROI"):
+            return
         stream = self.streams.get(src)
         point = self._event_to_frame_point(event, src)
         if not stream or point is None or stream.roi_drag_index is None:
@@ -1380,6 +1559,8 @@ class SecurityApp(ctk.CTk):
 
     def _on_video_right_click(self, event, src: str):
         if not src or not self.roi_mode_var.get():
+            return
+        if not self._require_permission(Permission.MANAGE_CONFIG, "edit ROI"):
             return
         stream = self.streams.get(src)
         point = self._event_to_frame_point(event, src)
@@ -1416,6 +1597,10 @@ class SecurityApp(ctk.CTk):
         )
 
     def _shutdown_stream_capture(self, stream: CameraStream):
+        try:
+            stream._stop_event.set()
+        except Exception:
+            pass
         capture_thread = stream.thread
         if capture_thread and capture_thread.is_alive() and capture_thread is not threading.current_thread():
             logger.info("[DIAG-BG] â± Chá» capture thread thoÃ¡t [%s]...", stream.display_name)
@@ -1514,6 +1699,11 @@ class SecurityApp(ctk.CTk):
                     command=lambda s=src: self._toggle_manual_record(s)
                 )
                 rec_btn.grid(row=0, column=1, padx=(4, 4), sticky="e")
+                if not self._has_permission(Permission.MANAGE_CONFIG):
+                    try:
+                        rec_btn.configure(state="disabled")
+                    except Exception:
+                        pass
                 self._record_buttons[src] = rec_btn
                 
                 # Video label
@@ -1589,6 +1779,11 @@ class SecurityApp(ctk.CTk):
                     stream.latest_detections = detections
                     stream.inference_latency_ms = per_stream_latency
                     stream.last_inference_at = time.time()
+                    self.alert_manager.record_inference_latency(
+                        stream.display_name,
+                        per_stream_latency,
+                        now=stream.last_inference_at,
+                    )
                 
                 time.sleep(0.005)
             else:
@@ -2150,6 +2345,8 @@ class SecurityApp(ctk.CTk):
 
     def on_closing(self):
         self.stop_all_cameras()
+        if hasattr(self, "camera_health_watchdog"):
+            self.camera_health_watchdog.stop(timeout=1.0)
         if self.system_monitor_agent:
             self.system_monitor_agent.stop(timeout=1.0)
         if hasattr(self, "mqtt_publisher"):
@@ -2168,5 +2365,5 @@ if __name__ == "__main__":
 
     # Phase 2: Nếu đăng nhập thành công → khởi động app chính
     if login_app.authenticated:
-        app = SecurityApp()
+        app = SecurityApp(current_user=login_app.authenticated_user)
         app.mainloop()
