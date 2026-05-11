@@ -33,3 +33,4 @@ wheels/
 # Dữ liệu sinh ra khi chạy / đóng gói
 events/
 logs/
+exports/

@@ -3,6 +3,18 @@ import os
 import sys
 from logging.handlers import RotatingFileHandler
 
+from persistent_env import get_persistent_app_dir
+
+
+def _default_log_dir() -> str:
+    configured_log_dir = os.getenv("LOG_DIR")
+    if configured_log_dir:
+        return configured_log_dir
+    if getattr(sys, "frozen", False):
+        return os.path.join(get_persistent_app_dir(), "logs")
+    return "logs"
+
+
 def setup_logging():
     """
     Thiết lập logging toàn cục (Root Logger) của toàn hệ thống.
@@ -20,8 +32,8 @@ def setup_logging():
         root_logger.removeHandler(h)
 
     # Đảm bảo thư mục logs tồn tại
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
+    log_dir = _default_log_dir()
+    os.makedirs(log_dir, exist_ok=True)
 
     # 1. Console Handler (Standard Output)
     console_handler = logging.StreamHandler(sys.stdout)
@@ -40,7 +52,7 @@ def setup_logging():
 
     # 2. System Log Handler (Chứa đủ mọi thứ từ INFO trở lên, luân phiên file)
     system_handler = RotatingFileHandler(
-        "logs/system.log", 
+        os.path.join(log_dir, "system.log"),
         maxBytes=10 * 1024 * 1024, # 10 MB
         backupCount=5, 
         encoding="utf-8"
@@ -54,7 +66,7 @@ def setup_logging():
 
     # 3. Error Log Handler (Chỉ chứa WARNING, ERROR, CRITICAL + Traceback)
     error_handler = RotatingFileHandler(
-        "logs/error.log",
+        os.path.join(log_dir, "error.log"),
         maxBytes=10 * 1024 * 1024, # 10 MB
         backupCount=5,
         encoding="utf-8"

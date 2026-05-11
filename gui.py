@@ -10,8 +10,8 @@ import time
 import json
 import queue
 import unicodedata
+from dataclasses import dataclass
 from datetime import datetime
-from logging.handlers import RotatingFileHandler
 from typing import Optional, Dict
 
 import cv2
@@ -24,11 +24,12 @@ from auth import AuthenticatedUser, AuthService, Permission, Role
 from camera_health import CameraHealthState, CameraHealthWatchdog, ExponentialBackoff
 from config import Config
 from logger_config import setup_logging
-from detector import ObjectDetector
+from detector import ObjectDetector, optimize_overlay_detections
 from event_store import EventStore
 from export_utils import export_count_rows_csv, export_count_rows_excel
 from fire_tracker import FireTracker
 from mqtt_publisher import AsyncMQTTPublisher
+from overlay_smoothing import BoxMotionSmoother
 from persistent_env import get_persistent_env_path, save_env_value
 from resource_monitor import ResourceMetrics, SystemMonitorAgent
 from roi_tools import class_counts, filter_detections_by_roi, frame_point_from_widget_event, nearest_vertex
@@ -61,7 +62,7 @@ RECORD_FUTURE_FRAMES = 150        # ~5 giây ghi thêm sau sự cố
 RECORD_FPS = 30.0                  # FPS khi ghi video sự cố
 VIDEO_ASPECT_RATIO = 9 / 16       # Tỉ lệ chiều cao/rộng (16:9)
 CAM_TILE_HEADER_HEIGHT = 30       # Chiều cao header mỗi camera tile (px)
-RENDER_INTERVAL_MS = 30            # Khoảng cách giữa các lần render (ms)
+RENDER_INTERVAL_MS = max(8, int(round(1000 / max(1, Config.DISPLAY_TARGET_FPS))))
 IDLE_RENDER_INTERVAL_MS = 50       # Render interval khi idle
 MIN_CELL_WIDTH = 200               # Chiều rộng tối thiểu mỗi camera cell
 SIDE_PANEL_TOTAL_WIDTH = 550       # Ước tính tổng width 2 side panel
@@ -75,6 +76,47 @@ _OBJECT_PALETTE = [
     (255,  80, 180), ( 30, 200, 255), (200, 120,   0),
     (  0,  80, 255),
 ]
+
+
+def _clamp_iou_threshold(value) -> float:
+    try:
+        numeric_value = float(value)
+    except (TypeError, ValueError):
+        numeric_value = Config.YOLO_IOU
+    return max(0.0, min(numeric_value, 1.0))
+
+
+def _overlay_containment_threshold(iou_threshold: float) -> float:
+    return max(Config.OVERLAY_DEDUP_CONTAINMENT, min(1.01, iou_threshold + 0.15))
+
+
+def dedupe_overlay_detections(detections: list, camera_config: Optional[dict] = None) -> list:
+    if not Config.OVERLAY_DEDUP_ENABLED:
+        return detections
+
+    iou_threshold = _clamp_iou_threshold(
+        (camera_config or {}).get("iou", Config.YOLO_IOU)
+    )
+    return optimize_overlay_detections(
+        detections,
+        iou_threshold=iou_threshold,
+        containment_threshold=_overlay_containment_threshold(iou_threshold),
+    )
+
+
+@dataclass(frozen=True)
+class FrameSnapshot:
+    frame_id: int
+    frame: np.ndarray
+
+
+@dataclass(frozen=True)
+class RenderResult:
+    frame_id: int
+    frame: np.ndarray
+    detections: list
+    has_inference: bool = False
+    detection_frame_id: Optional[int] = None
 
 
 class _TextboxHandler(logging.Handler):
@@ -101,6 +143,26 @@ class _StdoutRedirect:
             pass
 
     def flush(self): pass
+
+
+def compute_display_geometry(
+    frame_width: int,
+    frame_height: int,
+    container_width: int,
+    container_height: int,
+) -> Optional[tuple[int, int, int, int]]:
+    if frame_width <= 0 or frame_height <= 0 or container_width <= 10 or container_height <= 10:
+        return None
+
+    scale = min(container_width / frame_width, container_height / frame_height)
+    display_width = max(1, int(frame_width * scale))
+    display_height = max(1, int(frame_height * scale))
+    return (
+        display_width,
+        display_height,
+        max(0, (container_width - display_width) // 2),
+        max(0, (container_height - display_height) // 2),
+    )
 
 
 # ─────────────────────────────────────────────────────────────
@@ -260,16 +322,24 @@ class CameraStream:
         )
         self._stop_event = threading.Event()
         self._capture_lock = threading.Lock()
+        self._state_lock = threading.Lock()
         self._src_val = None
         
         self.latest_frame: Optional[np.ndarray] = None
         self.latest_detections: list = []
+        self.latest_result: Optional[RenderResult] = None
         self.inference_latency_ms = 0.0
         self.last_inference_at = 0.0
         self.last_counts: dict = {}
         self.roi_points: list[tuple[int, int]] = []
         self.roi_enabled = False
         self.roi_drag_index: Optional[int] = None
+        self.box_smoother = BoxMotionSmoother(
+            max_predict_frames=Config.BOX_PREDICT_MAX_FRAMES,
+            smoothing_alpha=Config.BOX_SMOOTHING_ALPHA,
+            match_iou_threshold=Config.BOX_MATCH_IOU,
+            center_distance_ratio=Config.BOX_MATCH_CENTER_RATIO,
+        )
         
         self.fps = 0.0
         self._fps_start = time.time()
@@ -283,6 +353,8 @@ class CameraStream:
         # Ring Buffer & Event Recording
         import collections
         self.frame_buffer = collections.deque(maxlen=RING_BUFFER_SIZE)
+        self._last_record_buffer_at = 0.0
+        self._last_output_record_at = 0.0
         self.is_recording = False
         self.record_frames_left = 0
         self.record_cooldown = 0
@@ -295,6 +367,67 @@ class CameraStream:
         self.reconnect_count = 0
         self.has_error = False
         self.error_message = ""
+
+    def publish_frame(self, frame: np.ndarray) -> int:
+        with self._state_lock:
+            self.latest_frame = frame
+            self.frame_id += 1
+            return self.frame_id
+
+    def snapshot_for_inference(self, last_processed_frame_id: Optional[int]) -> Optional[FrameSnapshot]:
+        with self._state_lock:
+            if self.latest_frame is None or self.frame_id == last_processed_frame_id:
+                return None
+            return FrameSnapshot(self.frame_id, self.latest_frame.copy())
+
+    def publish_detections(
+        self,
+        snapshot: FrameSnapshot,
+        detections: list,
+        latency_ms: float,
+        completed_at: Optional[float] = None,
+    ) -> RenderResult:
+        result = RenderResult(
+            frame_id=snapshot.frame_id,
+            frame=snapshot.frame,
+            detections=detections,
+            has_inference=True,
+            detection_frame_id=snapshot.frame_id,
+        )
+        with self._state_lock:
+            self.latest_detections = detections
+            self.latest_result = result
+            self.inference_latency_ms = latency_ms
+            self.last_inference_at = time.time() if completed_at is None else completed_at
+        return result
+
+    def get_render_result(self) -> Optional[RenderResult]:
+        with self._state_lock:
+            if self.latest_frame is None:
+                return self.latest_result
+            if self.latest_result is not None:
+                return RenderResult(
+                    frame_id=self.frame_id,
+                    frame=self.latest_frame,
+                    detections=self.latest_result.detections,
+                    has_inference=True,
+                    detection_frame_id=self.latest_result.detection_frame_id,
+                )
+            return RenderResult(self.frame_id, self.latest_frame, [])
+
+    def should_buffer_record_frame(self, now: float) -> bool:
+        interval = 1.0 / max(1.0, RECORD_FPS)
+        if self._last_record_buffer_at <= 0.0 or now - self._last_record_buffer_at + 1e-9 >= interval:
+            self._last_record_buffer_at = now
+            return True
+        return False
+
+    def should_record_output_frame(self, now: float) -> bool:
+        interval = 1.0 / max(1.0, RECORD_FPS)
+        if self._last_output_record_at <= 0.0 or now - self._last_output_record_at + 1e-9 >= interval:
+            self._last_output_record_at = now
+            return True
+        return False
 
     def _is_local_video_source(self, src_val) -> bool:
         return isinstance(src_val, str) and not src_val.startswith(("http://", "https://", "rtsp://"))
@@ -382,6 +515,13 @@ class CameraStream:
         if self.cap is not None and Config.FRAME_WIDTH > 0:
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, Config.FRAME_WIDTH)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, Config.FRAME_HEIGHT)
+        if self.cap is not None and not self.is_video_file:
+            target_fps = max(1, int(Config.LIVE_CAPTURE_TARGET_FPS))
+            self.cap.set(cv2.CAP_PROP_FPS, target_fps)
+            try:
+                self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+            except Exception:
+                pass
 
     def health_snapshot(self, now: Optional[float] = None):
         return self.health.snapshot(now)
@@ -441,7 +581,10 @@ class CameraStream:
                     with self._capture_lock:
                         cap = self.cap
                     if cap is not None:
-                        cap.grab()
+                        try:
+                            cap.grab()
+                        except Exception as exc:
+                            self._attempt_reconnect(f"Camera grab raised: {exc}")
                 continue
 
             with self._capture_lock:
@@ -451,15 +594,21 @@ class CameraStream:
                 self._attempt_reconnect("Camera capture is not connected")
                 continue
 
-            ret, frame = cap.read()
-            if not ret:
+            try:
+                ret, frame = cap.read()
+            except Exception as exc:
+                self._attempt_reconnect(f"Camera read raised: {exc}")
+                continue
+
+            if not ret or frame is None or getattr(frame, "size", 0) == 0:
                 if self.is_video_file:
                     logger.info("🎬 Phát hết video [%s].", self.source)
                     self.ended = True
                     self.is_running = False
                     break
 
-                self._attempt_reconnect("Camera read failed")
+                reason = "Camera read failed" if not ret else "Camera returned an empty frame"
+                self._attempt_reconnect(reason)
                 continue
 
             # Reset error state khi đọc frame thành công
@@ -478,14 +627,13 @@ class CameraStream:
                 scale = MAX_W / w
                 frame = cv2.resize(frame, (MAX_W, int(h * scale)))
 
-            self.latest_frame = frame
-            self.frame_id += 1
-            if not self.is_paused:
+            now = time.time()
+            self.publish_frame(frame)
+            if not self.is_paused and self.should_buffer_record_frame(now):
                 self.frame_buffer.append(frame.copy())
             
             # Tính FPS camera
             self._frame_count += 1
-            now = time.time()
             if now - self._fps_start >= 1.0:
                 self.fps = self._frame_count / (now - self._fps_start)
                 self._frame_count = 0
@@ -497,7 +645,7 @@ class CameraStream:
                     time.sleep(self.frame_delay - elapsed)
                 last_read_time = time.time()
             else:
-                time.sleep(0.01)
+                time.sleep(min(0.004, 1.0 / max(1, Config.LIVE_CAPTURE_TARGET_FPS * 4)))
 
     def stop(self):
         self.is_running = False
@@ -1046,7 +1194,7 @@ class SecurityApp(ctk.CTk):
         self.lbl_val_iou = ctk.CTkLabel(hdr_iou, text="85%", font=ctk.CTkFont(size=10, weight="bold"), text_color=CLR_GREEN)
         self.lbl_val_iou.pack(side="right")
 
-        self.slider_iou = ctk.CTkSlider(thresh_frame, from_=0.30, to=0.95, number_of_steps=65, height=12, button_color=CLR_GREEN, progress_color=CLR_GREEN, command=self._on_threshold_change)
+        self.slider_iou = ctk.CTkSlider(thresh_frame, from_=0.10, to=0.95, number_of_steps=85, height=12, button_color=CLR_GREEN, progress_color=CLR_GREEN, command=self._on_threshold_change)
         self.slider_iou.set(Config.YOLO_IOU)
         self.slider_iou.grid(row=5, column=0, padx=8, pady=(0, 8), sticky="ew")
         self._remember_admin_widget(self.slider_iou)
@@ -1209,6 +1357,21 @@ class SecurityApp(ctk.CTk):
     def _set_status(self, msg: str, color: str, icon: str = "⚪"):
         self.statusbar_left.configure(text=f"  {icon}  {msg}", text_color=color)
 
+    def _run_on_ui_thread(self, callback):
+        try:
+            self.after(0, callback)
+        except Exception:
+            callback()
+
+    def _open_export_folder(self, path: str):
+        folder = os.path.dirname(os.path.abspath(path or Config.EXPORT_DIR))
+        if not os.path.exists(folder):
+            os.makedirs(folder, exist_ok=True)
+        try:
+            os.startfile(folder)
+        except Exception as e:
+            logger.error("Khong the mo thu muc export: %s", e)
+
     def _on_config_target_change(self, target: str):
         if target not in self.camera_configs:
             return
@@ -1225,7 +1388,8 @@ class SecurityApp(ctk.CTk):
                 self.class_visibility[cls_name].set(visible)
 
     def _on_threshold_change(self, value=None):
-        if not hasattr(self, 'camera_configs'): return
+        if not hasattr(self, 'camera_configs'):
+            return
         if not getattr(self, "_building_ui", False) and not self._require_permission(Permission.MANAGE_CONFIG, "change model thresholds"):
             return
         
@@ -1294,7 +1458,8 @@ class SecurityApp(ctk.CTk):
                 cfg["class_visibility"][class_name] = var.get()
 
     def _register_class(self, class_name: str):
-        if class_name in self.class_visibility: return
+        if class_name in self.class_visibility:
+            return
         var = ctk.BooleanVar(value=True)
         self.class_visibility[class_name] = var
         
@@ -1327,7 +1492,8 @@ class SecurityApp(ctk.CTk):
                 pass
 
     def _is_class_visible(self, class_name: str) -> bool:
-        return self.class_visibility.get(class_name, ctk.BooleanVar(value=True)).get()
+        visibility_var = self.class_visibility.get(class_name)
+        return True if visibility_var is None else visibility_var.get()
 
     def _get_class_color(self, class_name: str) -> tuple:
         if class_name not in self.class_colors:
@@ -1649,9 +1815,10 @@ class SecurityApp(ctk.CTk):
         self.video_grid.update_idletasks()
         grid_w = self.video_grid.winfo_width()
         
-        if grid_w < 100: 
+        if grid_w < 100:
             grid_w = self.winfo_width() - SIDE_PANEL_TOTAL_WIDTH
-            if grid_w < 100: grid_w = 900
+            if grid_w < 100:
+                grid_w = 900
         
         cell_w = max(MIN_CELL_WIDTH, (grid_w - 30) // cols)
         cell_h = int(cell_w * VIDEO_ASPECT_RATIO) + CAM_TILE_HEADER_HEIGHT
@@ -1748,46 +1915,68 @@ class SecurityApp(ctk.CTk):
     def _multi_inference_loop(self):
         """Vòng lặp AI quét qua tất cả các luồng camera đang chạy để detect theo lô (batch)."""
         last_processed_frames = {}
+        last_error_log_at = 0.0
         
         while self.is_inferencing:
             try:
-                active_streams = list(self.streams.items())
-            except RuntimeError:
-                time.sleep(0.01)
+                processed = self._run_inference_once(last_processed_frames)
+            except Exception as exc:
+                now = time.time()
+                if now - last_error_log_at >= 1.0:
+                    logger.error("Inference loop failed; continuing after backoff: %s", exc, exc_info=True)
+                    last_error_log_at = now
+                time.sleep(0.05)
                 continue
-            
-            batch_frames = []
-            batch_streams = []
-            
-            for src, stream in active_streams:
-                if not stream.is_running:
-                    continue
-                
-                frame = stream.latest_frame
-                if frame is not None and stream.frame_id != last_processed_frames.get(src):
-                    batch_frames.append(frame)
-                    batch_streams.append(stream)
-                    last_processed_frames[src] = stream.frame_id
-                    
-            if batch_frames:
-                started = time.perf_counter()
-                batch_detections = self.detector.detect_batch(batch_frames, allowed_class_ids=None)
-                latency_ms = (time.perf_counter() - started) * 1000.0
-                per_stream_latency = latency_ms / max(1, len(batch_streams))
-                
-                for stream, detections in zip(batch_streams, batch_detections):
-                    stream.latest_detections = detections
-                    stream.inference_latency_ms = per_stream_latency
-                    stream.last_inference_at = time.time()
-                    self.alert_manager.record_inference_latency(
-                        stream.display_name,
-                        per_stream_latency,
-                        now=stream.last_inference_at,
-                    )
-                
-                time.sleep(0.005)
-            else:
-                time.sleep(0.01)
+
+            time.sleep(0.005 if processed else 0.01)
+
+    def _run_inference_once(self, last_processed_frames: dict) -> bool:
+        active_streams = list(self.streams.items())
+        max_batch_size = max(1, int(Config.INFERENCE_BATCH_SIZE))
+        batch_streams = []
+        processed_any = False
+
+        for src, stream in active_streams:
+            if not stream.is_running:
+                continue
+
+            snapshot = stream.snapshot_for_inference(last_processed_frames.get(src))
+            if snapshot is None:
+                continue
+
+            batch_streams.append((stream, snapshot))
+            last_processed_frames[src] = snapshot.frame_id
+
+            if len(batch_streams) >= max_batch_size:
+                self._publish_inference_batch(batch_streams)
+                processed_any = True
+                batch_streams = []
+
+        if batch_streams:
+            self._publish_inference_batch(batch_streams)
+            processed_any = True
+
+        return processed_any
+
+    def _publish_inference_batch(self, batch_streams: list) -> None:
+        batch_frames = [snapshot.frame for _, snapshot in batch_streams]
+        started = time.perf_counter()
+        batch_detections = self.detector.detect_batch(batch_frames, allowed_class_ids=None)
+        latency_ms = (time.perf_counter() - started) * 1000.0
+        completed_at = time.time()
+
+        for (stream, snapshot), detections in zip(batch_streams, batch_detections):
+            stream.publish_detections(
+                snapshot,
+                detections,
+                latency_ms=latency_ms,
+                completed_at=completed_at,
+            )
+            self.alert_manager.record_inference_latency(
+                stream.display_name,
+                latency_ms,
+                now=completed_at,
+            )
 
     def _render_loop(self):
         """Vòng lặp render chính — được bảo vệ bởi try/except."""
@@ -1823,10 +2012,13 @@ class SecurityApp(ctk.CTk):
                     lbl.configure(text=f"⚠️ {stream.error_message}", text_color=CLR_RED)
                 continue
 
-            frame = stream.latest_frame
-            detections = stream.latest_detections
+            render_result = stream.get_render_result()
             
-            if frame is not None:
+            if render_result is not None:
+                render_now = time.time()
+                frame = render_result.frame
+                detections = render_result.detections
+
                 # Đăng ký class mới từ nhận diện gốc
                 for det in detections:
                     if det.class_name not in self.class_visibility:
@@ -1856,10 +2048,19 @@ class SecurityApp(ctk.CTk):
                     detections = filtered_detections
                 if stream.roi_enabled and len(stream.roi_points) >= 3:
                     detections = filter_detections_by_roi(detections, stream.roi_points)
+                if Config.OVERLAY_DEDUP_ENABLED:
+                    detections = dedupe_overlay_detections(detections, cfg)
+                overlay_detections = detections
+                if Config.BOX_SMOOTHING_ENABLED and render_result.has_inference:
+                    overlay_detections = stream.box_smoother.render(
+                        detections,
+                        detection_frame_id=render_result.detection_frame_id,
+                        render_frame_id=render_result.frame_id,
+                    )
                 
                 # Cập nhật thông số thống kê
                 stream.last_counts = class_counts(detections)
-                should_sample_counts = time.time() - self._last_count_sample >= 1.0
+                should_sample_counts = render_now - self._last_count_sample >= 1.0
                 if should_sample_counts:
                     self._append_count_sample(stream, detections)
                 
@@ -1868,7 +2069,7 @@ class SecurityApp(ctk.CTk):
                 else:
                     fire_confirmed = False
                     
-                display_frame = self._draw_overlay(frame, detections, stream)
+                display_frame = self._draw_overlay(frame, overlay_detections, stream)
                 
                 # Cảnh báo Telegram Đa Kênh
                 if fire_confirmed:
@@ -1882,20 +2083,23 @@ class SecurityApp(ctk.CTk):
                     self._dispatch_fire_event(stream, display_frame.copy(), fire_dets)
                     
                     # Event Recording Trigger
-                    if not stream.is_recording and time.time() > stream.record_cooldown:
+                    if not stream.is_recording and render_now > stream.record_cooldown:
                         stream.is_recording = True
                         stream.record_frames_left = RECORD_FUTURE_FRAMES
                         stream.rec_buffer = list(stream.frame_buffer)
                         logger.info("[Record] 🔴 Bắt đầu ghi hình sự cố cho %s (%d frames buffer)...", stream.display_name, len(stream.rec_buffer))
 
+                recording_active = not stream.is_paused and (stream.is_recording or stream.manual_recording)
+                should_record_output = recording_active and stream.should_record_output_frame(render_now)
+
                 # Ghi luồng Video tương lai (event recording)
-                if stream.is_recording and not stream.is_paused:
+                if stream.is_recording and should_record_output:
                     stream.rec_buffer.append(display_frame.copy())
                     stream.record_frames_left -= 1
                     
                     if stream.record_frames_left <= 0:
                         stream.is_recording = False
-                        stream.record_cooldown = time.time() + Config.ALERT_COOLDOWN_SECONDS
+                        stream.record_cooldown = render_now + Config.ALERT_COOLDOWN_SECONDS
                         logger.info("[DIAG] ⏱ Bắt đầu copy rec_buffer (%d frames)...", len(stream.rec_buffer))
                         frames_ref = stream.rec_buffer  # Chỉ chuyển reference, KHÔNG copy
                         stream.rec_buffer = []           # Gán list mới cho stream
@@ -1907,7 +2111,7 @@ class SecurityApp(ctk.CTk):
                         ).start()
 
                 # Ghi hình thủ công
-                if stream.manual_recording and not stream.is_paused:
+                if stream.manual_recording and should_record_output:
                     stream.manual_rec_buffer.append(display_frame.copy())
 
                 # Render ra grid label
@@ -2018,8 +2222,10 @@ class SecurityApp(ctk.CTk):
 
     def _export_counts(self, fmt: str):
         rows = list(self._count_history)
+        label = fmt.upper()
         if not rows:
             logger.warning("No count data to export yet.")
+            self._set_status("Chưa có dữ liệu để xuất", CLR_YELLOW, "!")
             return
 
         def _run_export():
@@ -2031,8 +2237,20 @@ class SecurityApp(ctk.CTk):
                 else:
                     path = export_count_rows_csv(rows, os.path.join(Config.EXPORT_DIR, f"counts_{timestamp}.csv"))
                 logger.info("Exported %d count rows to %s", len(rows), path)
+                abs_path = os.path.abspath(path)
+                filename = os.path.basename(abs_path)
+                self._run_on_ui_thread(
+                    lambda: (
+                        self._set_status(f"Đã xuất {label}: {filename}", CLR_GREEN, "OK"),
+                        self._open_export_folder(abs_path),
+                    )
+                )
             except Exception as exc:
                 logger.error("Export failed: %s", exc, exc_info=True)
+                error_message = f"Lỗi xuất {label}: {exc}"
+                self._run_on_ui_thread(
+                    lambda msg=error_message: self._set_status(msg, CLR_RED, "!")
+                )
 
         threading.Thread(target=_run_export, daemon=True).start()
 
@@ -2071,15 +2289,16 @@ class SecurityApp(ctk.CTk):
         threading.Thread(target=_log_and_publish, daemon=True).start()
 
     def _display_on_label(self, frame: np.ndarray, lbl: ctk.CTkLabel, src: Optional[str] = None):
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # parent frame size
         parent = lbl.master
         lw = parent.winfo_width()
         lh = parent.winfo_height() - 24 # - header height
         if lw > 10 and lh > 10:
-            ih, iw = rgb.shape[:2]
-            scale = min(lw / iw, lh / ih)
-            nw, nh = int(iw * scale), int(ih * scale)
+            ih, iw = frame.shape[:2]
+            geometry = compute_display_geometry(iw, ih, lw, lh)
+            if geometry is None:
+                return
+            nw, nh, offset_x, offset_y = geometry
             if src is not None:
                 self._display_maps[src] = {
                     "widget": lbl,
@@ -2087,10 +2306,11 @@ class SecurityApp(ctk.CTk):
                     "frame_h": ih,
                     "image_w": nw,
                     "image_h": nh,
-                    "offset_x": max(0, (lw - nw) // 2),
-                    "offset_y": max(0, (lh - nh) // 2),
+                    "offset_x": offset_x,
+                    "offset_y": offset_y,
                 }
-            rgb = cv2.resize(rgb, (nw, nh), interpolation=cv2.INTER_LINEAR)
+            resized = cv2.resize(frame, (nw, nh), interpolation=cv2.INTER_LINEAR)
+            rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
             pil = Image.fromarray(rgb)
             tk_img = ImageTk.PhotoImage(image=pil)
             lbl.configure(image=tk_img, text="")
@@ -2240,12 +2460,14 @@ class SecurityApp(ctk.CTk):
         for det in detections:
             if det.is_fire:
                 fire_dets.append(det)
-                if not self._is_class_visible(det.class_name): continue
+                if not self._is_class_visible(det.class_name):
+                    continue
                 is_smoke = det.class_name.lower() == Config.SMOKE_CLASS_NAME.lower()
                 color = Config.COLOR_FIRE if is_confirmed else (Config.COLOR_SMOKE if is_smoke else Config.COLOR_FIRE_UNCONFIRMED)
                 label = f"{'SMOKE' if is_smoke else 'FIRE'} {det.confidence:.0%}"
             else:
-                if not self._is_class_visible(det.class_name): continue
+                if not self._is_class_visible(det.class_name):
+                    continue
                 color = self._get_class_color(det.class_name)
                 label = f"{det.class_name} {det.confidence:.0%}"
 
@@ -2300,7 +2522,8 @@ class SecurityApp(ctk.CTk):
         return frame
         
     def _save_event_video(self, frames: list, source_name: str):
-        if not frames: return
+        if not frames:
+            return
         try:
             logger.info("[DIAG-SAVE] ⏱ Bắt đầu _save_event_video: %s (%d frames)", source_name, len(frames))
             event_dir = getattr(Config, "EVENT_DIR", "events")
@@ -2317,8 +2540,10 @@ class SecurityApp(ctk.CTk):
             h, w = frames[0].shape[:2]
             
             # Đảm bảo width và height là số CHẴN (Bắt buộc với một số codec để tránh crash C++)
-            if w % 2 != 0: w -= 1
-            if h % 2 != 0: h -= 1
+            if w % 2 != 0:
+                w -= 1
+            if h % 2 != 0:
+                h -= 1
             
             logger.info("[DIAG-SAVE] ⏱ Tạo VideoWriter: %s (%dx%d)", filepath, w, h)
             import sys

@@ -1,4 +1,5 @@
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -7,7 +8,12 @@ APP_NAME = "CameraAI"
 
 
 def get_project_env_path(project_root: str | None = None) -> str:
-    root_dir = project_root or os.path.dirname(os.path.abspath(__file__))
+    if project_root:
+        root_dir = project_root
+    elif getattr(sys, "frozen", False):
+        root_dir = os.path.dirname(os.path.abspath(sys.executable))
+    else:
+        root_dir = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(root_dir, ".env")
 
 

@@ -1,8 +1,11 @@
 import os
+import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from persistent_env import (
+    get_project_env_path,
     get_persistent_env_path,
     load_application_env,
     save_env_value,
@@ -10,6 +13,17 @@ from persistent_env import (
 
 
 class PersistentEnvTests(unittest.TestCase):
+    def test_get_project_env_path_uses_executable_directory_when_frozen(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            executable_path = os.path.join(temp_dir, "CameraAI.exe")
+            with (
+                patch.object(sys, "frozen", True, create=True),
+                patch.object(sys, "executable", executable_path),
+            ):
+                env_path = get_project_env_path()
+
+        self.assertEqual(env_path, os.path.join(temp_dir, ".env"))
+
     def test_get_persistent_env_path_uses_appdata_directory(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             env_path = get_persistent_env_path(app_name="CameraAI", appdata_root=temp_dir)

@@ -2,7 +2,6 @@
 fire_tracker.py - Theo dõi trạng thái đám cháy và xác nhận sau 5 giây liên tục
 """
 
-import logging
 import time
 from typing import List, Optional
 from detector import Detection

@@ -1,4 +1,5 @@
 import unittest
+from types import SimpleNamespace
 
 from auth import AuthService, Permission, Role
 
@@ -25,6 +26,25 @@ class AuthServiceTests(unittest.TestCase):
 
         self.assertIsNone(service.authenticate("admin", "wrong"))
         self.assertIsNone(service.authenticate("missing", "admin-pass"))
+
+    def test_from_config_does_not_enable_blank_password_accounts(self):
+        service = AuthService.from_config(
+            SimpleNamespace(
+                AUTH_ADMIN_USERNAME="admin",
+                AUTH_ADMIN_PASSWORD="",
+                AUTH_USER_USERNAME="user",
+                AUTH_USER_PASSWORD="",
+            )
+        )
+
+        self.assertIsNone(service.authenticate("admin", ""))
+        self.assertIsNone(service.authenticate("user", ""))
+
+    def test_from_config_does_not_fallback_to_default_passwords(self):
+        service = AuthService.from_config(SimpleNamespace())
+
+        self.assertIsNone(service.authenticate("admin", "admin"))
+        self.assertIsNone(service.authenticate("user", "user"))
 
     def test_user_role_is_read_only_while_admin_can_manage_configuration(self):
         service = AuthService(

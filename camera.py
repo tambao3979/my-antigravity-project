@@ -9,12 +9,12 @@ import cv2
 import numpy as np
 from typing import List, Optional
 
-logger = logging.getLogger(__name__)
-
 from config import Config
-from detector import ObjectDetector, Detection
+from detector import ObjectDetector, Detection, optimize_overlay_detections
 from fire_tracker import FireTracker
 from telegram_notifier import TelegramNotifier
+
+logger = logging.getLogger(__name__)
 
 
 class CameraSystem:
@@ -121,6 +121,12 @@ class CameraSystem:
 
                 # ── Phát hiện đối tượng ──
                 detections = self.detector.detect(frame)
+                if Config.OVERLAY_DEDUP_ENABLED:
+                    detections = optimize_overlay_detections(
+                        detections,
+                        iou_threshold=Config.OVERLAY_DEDUP_IOU,
+                        containment_threshold=Config.OVERLAY_DEDUP_CONTAINMENT,
+                    )
 
                 # ── Cập nhật tracker ──
                 fire_confirmed = self.tracker.update(detections)
@@ -275,7 +281,7 @@ class CameraSystem:
             f"FPS: {self._fps:.1f}",
             f"Doi tuong: {total_det} | Lua: {fire_det}",
             f"Trang thai: {'PHAT HIEN LUA!' if fire_det > 0 else 'Binh thuong'}",
-            f"Telegram cooldown: {self.notifier.cooldown_remaining:.0f}s",
+            f"Telegram cooldown: {self.notifier.cooldown_remaining():.0f}s",
         ]
 
         for i, line in enumerate(lines):

@@ -17,6 +17,7 @@ import requests
 from config import Config
 
 logger = logging.getLogger(__name__)
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 
 
 class TelegramNotifier:
@@ -66,6 +67,50 @@ class TelegramNotifier:
     def can_send(self, source_name: str = "default") -> bool:
         """True nếu có thể gửi thông báo (cooldown đã hết)"""
         return self.cooldown_remaining(source_name) == 0.0
+
+    def _encode_jpeg(self, frame: np.ndarray) -> bytes | None:
+        ok, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        if not ok or buffer is None:
+            logger.error("Alert image encoding failed.")
+            return None
+        return buffer.tobytes()
+
+    def _post_with_retries(self, channel_name: str, request_factory):
+        attempts = max(1, int(getattr(Config, "ALERT_SEND_RETRIES", 1)))
+        backoff = max(0.0, float(getattr(Config, "ALERT_RETRY_BACKOFF_SECONDS", 0.0)))
+
+        for attempt in range(1, attempts + 1):
+            try:
+                response = request_factory()
+            except requests.exceptions.RequestException as exc:
+                if attempt >= attempts:
+                    raise
+                logger.warning(
+                    "%s transient send failure (%d/%d): %s",
+                    channel_name,
+                    attempt,
+                    attempts,
+                    exc,
+                )
+                if backoff > 0.0:
+                    time.sleep(backoff * attempt)
+                continue
+
+            if response.status_code in RETRYABLE_STATUS_CODES and attempt < attempts:
+                logger.warning(
+                    "%s returned retryable HTTP %d (%d/%d)",
+                    channel_name,
+                    response.status_code,
+                    attempt,
+                    attempts,
+                )
+                if backoff > 0.0:
+                    time.sleep(backoff * attempt)
+                continue
+
+            return response
+
+        raise RuntimeError(f"{channel_name} request exhausted retries")
 
     def send_fire_alert(self, frame: np.ndarray, num_detections: int = 1, source_name: str = "Không rõ") -> bool:
         """
@@ -145,19 +190,22 @@ class TelegramNotifier:
     def _send_photo_with_caption(self, frame: np.ndarray, caption: str) -> bool:
         """Gửi ảnh kèm caption qua sendPhoto API"""
         try:
-            _, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
-            image_bytes = io.BytesIO(buffer.tobytes())
-            image_bytes.name = "fire_alert.jpg"
+            image_payload = self._encode_jpeg(frame)
+            if image_payload is None:
+                return False
 
-            response = requests.post(
-                url=f"{self._base_url}/sendPhoto",
-                data={
-                    "chat_id": self._chat_id,
-                    "caption": caption,
-                    "parse_mode": "HTML"
-                },
-                files={"photo": ("fire_alert.jpg", image_bytes, "image/jpeg")},
-                timeout=10
+            response = self._post_with_retries(
+                "Telegram",
+                lambda: requests.post(
+                    url=f"{self._base_url}/sendPhoto",
+                    data={
+                        "chat_id": self._chat_id,
+                        "caption": caption,
+                        "parse_mode": "HTML"
+                    },
+                    files={"photo": ("fire_alert.jpg", io.BytesIO(image_payload), "image/jpeg")},
+                    timeout=10,
+                ),
             )
 
             if response.status_code == 200:
@@ -190,15 +238,18 @@ class TelegramNotifier:
 
         # Bước 1: Upload ảnh
         try:
-            _, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
-            img_bytes = io.BytesIO(buffer.tobytes())
-            img_bytes.name = "fire_alert.jpg"
+            image_payload = self._encode_jpeg(frame)
+            if image_payload is None:
+                return self._send_zalo_text(token, user_id, text)
 
-            upload_resp = requests.post(
-                url="https://openapi.zalo.me/v2.0/oa/upload/image",
-                headers=headers,
-                files={"file": ("fire_alert.jpg", img_bytes, "image/jpeg")},
-                timeout=15
+            upload_resp = self._post_with_retries(
+                "Zalo upload",
+                lambda: requests.post(
+                    url="https://openapi.zalo.me/v2.0/oa/upload/image",
+                    headers=headers,
+                    files={"file": ("fire_alert.jpg", io.BytesIO(image_payload), "image/jpeg")},
+                    timeout=15,
+                ),
             )
             upload_data = upload_resp.json()
             attachment_id = upload_data.get("data", {}).get("attachment_id", "")
@@ -222,11 +273,14 @@ class TelegramNotifier:
                     "text": text
                 }
             }
-            resp = requests.post(
-                url="https://openapi.zalo.me/v2.0/oa/message",
-                headers={**headers, "Content-Type": "application/json"},
-                json=payload,
-                timeout=10
+            resp = self._post_with_retries(
+                "Zalo message",
+                lambda: requests.post(
+                    url="https://openapi.zalo.me/v2.0/oa/message",
+                    headers={**headers, "Content-Type": "application/json"},
+                    json=payload,
+                    timeout=10,
+                ),
             )
             data = resp.json()
             if data.get("error") == 0:
@@ -246,11 +300,14 @@ class TelegramNotifier:
                 "recipient": {"user_id": user_id},
                 "message": {"text": text}
             }
-            resp = requests.post(
-                url="https://openapi.zalo.me/v2.0/oa/message",
-                headers={"access_token": token, "Content-Type": "application/json"},
-                json=payload,
-                timeout=10
+            resp = self._post_with_retries(
+                "Zalo text",
+                lambda: requests.post(
+                    url="https://openapi.zalo.me/v2.0/oa/message",
+                    headers={"access_token": token, "Content-Type": "application/json"},
+                    json=payload,
+                    timeout=10,
+                ),
             )
             data = resp.json()
             if data.get("error") == 0:
@@ -270,7 +327,9 @@ class TelegramNotifier:
     def _send_webhook(self, url: str, frame: np.ndarray, source_name: str, num_detections: int) -> bool:
         """Gửi Multipart request kèm JSON data và ảnh về API URL của User"""
         try:
-            _, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            image_payload = self._encode_jpeg(frame)
+            if image_payload is None:
+                return False
 
             data = {
                 "source": source_name,
@@ -279,11 +338,15 @@ class TelegramNotifier:
                 "message": "CẢNH BÁO CHÁY"
             }
 
-            files = {
-                "image": ("alert.jpg", buffer.tobytes(), "image/jpeg")
-            }
-
-            response = requests.post(url, data=data, files=files, timeout=5)
+            response = self._post_with_retries(
+                "Webhook",
+                lambda: requests.post(
+                    url,
+                    data=data,
+                    files={"image": ("alert.jpg", image_payload, "image/jpeg")},
+                    timeout=5,
+                ),
+            )
             if response.status_code in (200, 201):
                 logger.info("✅ Đã bắn Webhook API tới ứng dụng User thành công.")
                 return True

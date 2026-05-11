@@ -44,20 +44,21 @@ class AuthService:
         self._users: dict[str, tuple[str, Role]] = {}
         for username, (password, role) in users.items():
             clean_username = str(username).strip()
-            if not clean_username:
+            clean_password = str(password)
+            if not clean_username or not clean_password:
                 continue
-            self._users[clean_username] = (str(password), Role(role))
+            self._users[clean_username] = (clean_password, Role(role))
 
     @classmethod
     def from_config(cls, config) -> "AuthService":
         return cls(
             {
                 getattr(config, "AUTH_ADMIN_USERNAME", "admin"): (
-                    getattr(config, "AUTH_ADMIN_PASSWORD", "admin"),
+                    getattr(config, "AUTH_ADMIN_PASSWORD", ""),
                     Role.ADMIN,
                 ),
                 getattr(config, "AUTH_USER_USERNAME", "user"): (
-                    getattr(config, "AUTH_USER_PASSWORD", "user"),
+                    getattr(config, "AUTH_USER_PASSWORD", ""),
                     Role.USER,
                 ),
             }

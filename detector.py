@@ -2,6 +2,8 @@
 detector.py - YOLO model wrapper cho phát hiện đối tượng.
 """
 
+import ast
+import builtins
 import logging
 import functools
 import types
@@ -9,6 +11,44 @@ from dataclasses import dataclass
 from typing import List, Optional, Set
 
 import numpy as np
+
+
+def _resolve_annotation_for_singledispatch(annotation: str, globalns: dict | None = None):
+    namespace = globalns or {}
+    tree = ast.parse(annotation, mode="eval")
+
+    def resolve(node):
+        if isinstance(node, ast.Name):
+            if node.id == "None":
+                return type(None)
+            if node.id in namespace:
+                return namespace[node.id]
+            if hasattr(builtins, node.id):
+                return getattr(builtins, node.id)
+            raise ValueError(f"Unknown annotation name: {node.id}")
+
+        if isinstance(node, ast.Attribute):
+            if node.attr.startswith("__"):
+                raise ValueError("Dunder attributes are not allowed in annotations")
+            base = resolve(node.value)
+            try:
+                return getattr(base, node.attr)
+            except AttributeError as error:
+                raise ValueError(f"Unknown annotation attribute: {node.attr}") from error
+
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+            left = resolve(node.left)
+            right = resolve(node.right)
+            if isinstance(left, (type, types.UnionType)) and isinstance(right, (type, types.UnionType)):
+                return left | right
+            raise ValueError("Union annotations must contain only types")
+
+        raise ValueError("Unsupported annotation expression")
+
+    resolved = resolve(tree.body)
+    if isinstance(resolved, (type, types.UnionType)):
+        return resolved
+    raise ValueError("Annotation did not resolve to a type")
 
 
 def _patch_singledispatch_for_nuitka() -> None:
@@ -45,7 +85,9 @@ def _patch_singledispatch_for_nuitka() -> None:
                 first_annot = next(iter(annotations.values()))
                 if isinstance(first_annot, str):
                     try:
-                        first_annot = eval(first_annot, getattr(cls, "__globals__", {}), {})
+                        first_annot = _resolve_annotation_for_singledispatch(
+                            first_annot, getattr(cls, "__globals__", {})
+                        )
                     except Exception:
                         raise exc
 
@@ -62,9 +104,9 @@ def _patch_singledispatch_for_nuitka() -> None:
 
 _patch_singledispatch_for_nuitka()
 
-from ultralytics import YOLO
+from ultralytics import YOLO  # noqa: E402
 
-from config import Config
+from config import Config  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +159,11 @@ def build_tile_regions(width: int, height: int, tile_size: int, overlap: int) ->
         for y in y_starts
         for x in x_starts
     ]
+
+
+@functools.lru_cache(maxsize=32)
+def cached_tile_regions(width: int, height: int, tile_size: int, overlap: int) -> tuple[TileRegion, ...]:
+    return tuple(build_tile_regions(width, height, tile_size, overlap))
 
 
 def _axis_starts(length: int, tile_size: int, overlap: int) -> List[int]:
@@ -180,6 +227,42 @@ def merge_detections(
     return kept
 
 
+def optimize_overlay_detections(
+    detections: List[Detection],
+    iou_threshold: float = 0.45,
+    containment_threshold: float = 0.75,
+    hazards_only: bool = True,
+    class_agnostic: bool = False,
+) -> List[Detection]:
+    """Reduce visual clutter from overlapping boxes before drawing overlays."""
+    kept: List[Detection] = []
+
+    for detection in sorted(detections, key=lambda det: det.confidence, reverse=True):
+        if detection.x2 <= detection.x1 or detection.y2 <= detection.y1:
+            continue
+
+        is_duplicate = False
+        for existing in kept:
+            if hazards_only and not (detection.is_fire and existing.is_fire):
+                continue
+
+            same_class = detection.class_name.lower() == existing.class_name.lower()
+            if not class_agnostic and not same_class:
+                continue
+
+            if (
+                box_iou(detection, existing) >= iou_threshold
+                or box_containment_ratio(detection, existing) >= containment_threshold
+            ):
+                is_duplicate = True
+                break
+
+        if not is_duplicate:
+            kept.append(detection)
+
+    return kept
+
+
 def box_iou(first: Detection, second: Detection) -> float:
     x1 = max(first.x1, second.x1)
     y1 = max(first.y1, second.y1)
@@ -196,6 +279,24 @@ def box_iou(first: Detection, second: Detection) -> float:
     second_area = max(0, second.x2 - second.x1) * max(0, second.y2 - second.y1)
     union = first_area + second_area - intersection
     return intersection / union if union > 0 else 0.0
+
+
+def box_containment_ratio(first: Detection, second: Detection) -> float:
+    x1 = max(first.x1, second.x1)
+    y1 = max(first.y1, second.y1)
+    x2 = min(first.x2, second.x2)
+    y2 = min(first.y2, second.y2)
+
+    inter_w = max(0, x2 - x1)
+    inter_h = max(0, y2 - y1)
+    intersection = inter_w * inter_h
+    if intersection == 0:
+        return 0.0
+
+    first_area = max(0, first.x2 - first.x1) * max(0, first.y2 - first.y1)
+    second_area = max(0, second.x2 - second.x1) * max(0, second.y2 - second.y1)
+    smaller_area = min(first_area, second_area)
+    return intersection / smaller_area if smaller_area > 0 else 0.0
 
 
 def _clip_int(value: int, low: int, high: int) -> int:
@@ -309,6 +410,10 @@ class ObjectDetector:
             "max_det": Config.YOLO_MAX_DET,
             "agnostic_nms": Config.YOLO_AGNOSTIC_NMS,
         }
+        if Config.YOLO_DEVICE:
+            predict_kwargs["device"] = Config.YOLO_DEVICE
+        if Config.YOLO_HALF:
+            predict_kwargs["half"] = True
         if Config.YOLO_AUGMENT:
             predict_kwargs["augment"] = True
 
@@ -352,7 +457,7 @@ class ObjectDetector:
 
         for frame_index, frame in enumerate(frames):
             height, width = frame.shape[:2]
-            regions = build_tile_regions(width, height, tile_size, overlap)
+            regions = cached_tile_regions(width, height, tile_size, overlap)
             if len(regions) <= 1:
                 continue
 

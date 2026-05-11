@@ -3,6 +3,7 @@ import sqlite3
 import tempfile
 import unittest
 from contextlib import closing
+from unittest.mock import patch
 
 import numpy as np
 
@@ -41,6 +42,31 @@ class EventStoreTests(unittest.TestCase):
             self.assertEqual(rows[0][1], "cam-1")
             self.assertEqual(rows[0][2], 1)
             self.assertEqual(rows[0][3], record.snapshot_path)
+
+    def test_log_event_fails_when_snapshot_cannot_be_written(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = EventStore(
+                db_path=os.path.join(tmp, "events.db"),
+                snapshot_dir=os.path.join(tmp, "snapshots"),
+            )
+            frame = np.full((80, 120, 3), 128, dtype=np.uint8)
+            detections = [Detection("fire", 0.93, 10, 10, 50, 50)]
+
+            with patch("event_store.cv2.imwrite", return_value=False):
+                with self.assertRaises(RuntimeError):
+                    store.log_event("fire_confirmed", "cam-1", frame, detections)
+
+    def test_recent_events_rejects_negative_limit_instead_of_returning_everything(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            store = EventStore(
+                db_path=os.path.join(tmp, "events.db"),
+                snapshot_dir=os.path.join(tmp, "snapshots"),
+            )
+            frame = np.full((80, 120, 3), 128, dtype=np.uint8)
+            detections = [Detection("fire", 0.93, 10, 10, 50, 50)]
+            store.log_event("fire_confirmed", "cam-1", frame, detections)
+
+            self.assertEqual(store.recent_events(limit=-1), [])
 
 
 if __name__ == "__main__":

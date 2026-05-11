@@ -40,3 +40,67 @@ RuntimeError: Excel export requires optional dependency: openpyxl
 [2026-04-29 12:12:01] [WARNING] [Thread-10 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"' is slow: 483.1ms (threshold 250.0ms).
 [2026-04-29 12:12:01] [WARNING] [Thread-10 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Xe_và_Người.mp4"' is slow: 483.1ms (threshold 250.0ms).
 [2026-04-29 14:38:07] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-01 20:49:00] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-02 07:24:08] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-02 07:33:28] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-02 11:54:36] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-02 11:59:56] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-02 12:06:21] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-02 13:00:40] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-02 13:01:20] [ERROR] [Thread-15 (_run_export)] [__main__:gui.py:2132] - Export failed: Excel export requires optional dependency: openpyxl
+Traceback (most recent call last):
+  File "C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 32, in export_count_rows_excel
+    from openpyxl import Workbook
+ModuleNotFoundError: No module named 'openpyxl'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\gui.py", line 2127, in _run_export
+    path = export_count_rows_excel(rows, os.path.join(Config.EXPORT_DIR, f"counts_{timestamp}.xlsx"))
+  File "C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 34, in export_count_rows_excel
+    raise RuntimeError("Excel export requires optional dependency: openpyxl") from exc
+RuntimeError: Excel export requires optional dependency: openpyxl
+[2026-05-02 13:01:23] [ERROR] [Thread-16 (_run_export)] [__main__:gui.py:2132] - Export failed: Excel export requires optional dependency: openpyxl
+Traceback (most recent call last):
+  File "C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 32, in export_count_rows_excel
+    from openpyxl import Workbook
+ModuleNotFoundError: No module named 'openpyxl'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\gui.py", line 2127, in _run_export
+    path = export_count_rows_excel(rows, os.path.join(Config.EXPORT_DIR, f"counts_{timestamp}.xlsx"))
+  File "C:\Users\MAITAM-DNI\.gemini\antigravity\playground\rogue-perseverance\export_utils.py", line 34, in export_count_rows_excel
+    raise RuntimeError("Excel export requires optional dependency: openpyxl") from exc
+RuntimeError: Excel export requires optional dependency: openpyxl
+[2026-05-03 17:27:00] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-03 17:27:10] [WARNING] [MainThread] [__main__:gui.py:2160] - No count data to export yet.
+[2026-05-03 17:27:12] [WARNING] [MainThread] [__main__:gui.py:2160] - No count data to export yet.
+[2026-05-03 17:27:13] [WARNING] [MainThread] [__main__:gui.py:2160] - No count data to export yet.
+[2026-05-04 11:49:32] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-04 12:27:16] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-04 14:58:02] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-04 20:45:33] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-04 20:46:01] [WARNING] [Thread-7 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\app\1.mp4"' is slow: 929.0ms (threshold 250.0ms).
+[2026-05-04 20:46:05] [WARNING] [Thread-7 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\app\3.mp4"' is slow: 890.9ms (threshold 250.0ms).
+[2026-05-04 20:46:05] [WARNING] [Thread-7 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"' is slow: 890.9ms (threshold 250.0ms).
+[2026-05-04 20:46:05] [WARNING] [Thread-7 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"' is slow: 890.9ms (threshold 250.0ms).
+[2026-05-04 20:46:05] [WARNING] [Thread-7 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"' is slow: 890.9ms (threshold 250.0ms).
+[2026-05-08 12:27:22] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-08 12:27:27] [WARNING] [Thread-3 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\app\1.mp4"' is slow: 461.7ms (threshold 250.0ms).
+[2026-05-08 12:27:58] [WARNING] [Thread-17 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\app\3.mp4"' is slow: 446.9ms (threshold 250.0ms).
+[2026-05-08 12:27:58] [WARNING] [Thread-17 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"' is slow: 596.2ms (threshold 250.0ms).
+[2026-05-08 12:27:59] [WARNING] [Thread-17 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Lửa_Cháy.mp4"' is slow: 487.3ms (threshold 250.0ms).
+[2026-05-08 12:27:59] [WARNING] [Thread-17 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân (1).mp4"' is slow: 495.2ms (threshold 250.0ms).
+[2026-05-08 12:28:05] [WARNING] [Thread-17 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_video_lửa_cháy_và_công_nhân.mp4"' is slow: 467.7ms (threshold 250.0ms).
+[2026-05-08 12:28:06] [WARNING] [Thread-17 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Xe_và_Người.mp4"' is slow: 468.1ms (threshold 250.0ms).
+[2026-05-08 12:28:06] [WARNING] [Thread-17 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Video_Công_Nhân_Đứng_Im_Giây.mp4"' is slow: 513.1ms (threshold 250.0ms).
+[2026-05-08 12:28:32] [WARNING] [Thread-37 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\app\1.mp4"' is slow: 403.3ms (threshold 250.0ms).
+[2026-05-08 20:49:59] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-08 20:58:42] [WARNING] [Thread-19 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"' is slow: 556.1ms (threshold 250.0ms).
+[2026-05-08 21:08:42] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:49] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-08 21:08:50] [WARNING] [Thread-5 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"' is slow: 308.3ms (threshold 250.0ms).
+[2026-05-11 20:47:58] [WARNING] [MainThread] [telegram_notifier:telegram_notifier.py:50] - ZALO_OA_TOKEN hoặc ZALO_USER_ID chưa được cấu hình. Thông báo Zalo sẽ không được gửi!
+[2026-05-11 20:57:21] [WARNING] [Thread-18 (_multi_inference_loop)] [alerts:alerts.py:180] - ALERT [inference_slow] Inference for '"D:\Downloads\Tạo_Video_Đám_Cháy_Công_Ty.mp4"' is slow: 442.4ms (threshold 250.0ms).

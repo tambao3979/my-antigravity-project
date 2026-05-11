@@ -16,7 +16,7 @@ a = Analysis(
     binaries=[],
     datas=[
         ('weights/best.pt', 'weights'), # Model AI — BẮT BUỘC
-        ('.env', '.'),                  # Cấu hình môi trường
+        ('logo.ico', '.'),              # Icon/logo dùng lúc chạy GUI packaged
         *ctk_datas,                     # Assets của CustomTkinter (themes, fonts)
     ],
     hiddenimports=[
@@ -28,6 +28,9 @@ a = Analysis(
         'cv2',
         'requests',
         'dotenv',
+        'openpyxl',
+        'pynvml',
+        'lap',
     ],
     hookspath=[],
     hooksconfig={},
@@ -66,7 +69,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,              # Thêm 'icon.ico' nếu có icon riêng
+    icon='logo.ico',
 )
 
 coll = COLLECT(

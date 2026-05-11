@@ -106,6 +106,14 @@ class EventStore:
         )
 
     def recent_events(self, limit: int = 200) -> list[dict[str, Any]]:
+        try:
+            safe_limit = int(limit)
+        except (TypeError, ValueError):
+            safe_limit = 200
+        if safe_limit <= 0:
+            return []
+        safe_limit = min(safe_limit, 1000)
+
         with closing(sqlite3.connect(self.db_path)) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(
@@ -116,7 +124,7 @@ class EventStore:
                 ORDER BY id DESC
                 LIMIT ?
                 """,
-                (limit,),
+                (safe_limit,),
             ).fetchall()
 
         return [dict(row) for row in rows]
@@ -134,7 +142,10 @@ class EventStore:
         safe_source = "".join(ch if ch.isalnum() else "_" for ch in source_name).strip("_")
         filename = f"{event_type}_{safe_source or 'source'}_{stamp}.jpg"
         path = os.path.join(self.snapshot_dir, filename)
-        cv2.imwrite(path, crop, [cv2.IMWRITE_JPEG_QUALITY, 85])
+        if crop is None or getattr(crop, "size", 0) == 0:
+            raise RuntimeError("Cannot write event snapshot from an empty frame")
+        if not cv2.imwrite(path, crop, [cv2.IMWRITE_JPEG_QUALITY, 85]):
+            raise RuntimeError(f"Failed to write event snapshot: {path}")
         return path
 
     def _detection_to_dict(self, detection: Any) -> dict[str, Any]:

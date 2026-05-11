@@ -7,13 +7,26 @@ from detector import (
     Detection,
     ObjectDetector,
     TileRegion,
+    _resolve_annotation_for_singledispatch,
     build_tile_regions,
+    cached_tile_regions,
     merge_detections,
+    optimize_overlay_detections,
     remap_tile_detection,
 )
 
 
 class DetectorTilingTests(unittest.TestCase):
+    def test_resolve_string_annotation_supports_safe_types_and_unions(self):
+        namespace = {"PathLike": str}
+
+        self.assertIs(_resolve_annotation_for_singledispatch("PathLike", namespace), str)
+        self.assertEqual(_resolve_annotation_for_singledispatch("str | bytes", {}), str | bytes)
+
+    def test_resolve_string_annotation_rejects_executable_expressions(self):
+        with self.assertRaises(ValueError):
+            _resolve_annotation_for_singledispatch("__import__('os').system('echo unsafe')", {})
+
     def test_build_tile_regions_covers_full_frame_with_overlap(self):
         regions = build_tile_regions(width=1280, height=720, tile_size=512, overlap=128)
 
@@ -27,6 +40,13 @@ class DetectorTilingTests(unittest.TestCase):
                     any(region.x1 <= x < region.x2 and region.y1 <= y < region.y2 for region in regions),
                     f"Point {(x, y)} is not covered by any tile",
                 )
+
+    def test_cached_tile_regions_reuses_static_video_geometry(self):
+        first = cached_tile_regions(width=1280, height=720, tile_size=512, overlap=128)
+        second = cached_tile_regions(width=1280, height=720, tile_size=512, overlap=128)
+
+        self.assertIs(first, second)
+        self.assertEqual(list(first), build_tile_regions(width=1280, height=720, tile_size=512, overlap=128))
 
     def test_remap_tile_detection_offsets_and_clips_box_to_original_frame(self):
         detection = Detection("fire", 0.91, 10, 20, 140, 160)
@@ -57,6 +77,35 @@ class DetectorTilingTests(unittest.TestCase):
         self.assertIn(("fire", 0.92, 102, 102, 202, 202), self._as_tuples(merged))
         self.assertIn(("fire", 0.80, 140, 140, 240, 240), self._as_tuples(merged))
         self.assertIn(("smoke", 0.85, 102, 102, 202, 202), self._as_tuples(merged))
+
+    def test_optimize_overlay_detections_collapses_nested_hazard_boxes(self):
+        detections = [
+            Detection("fire", 0.91, 100, 100, 300, 300),
+            Detection("fire", 0.82, 120, 120, 240, 240),
+            Detection("fire", 0.77, 500, 100, 620, 240),
+            Detection("smoke", 0.88, 115, 115, 280, 280),
+        ]
+
+        optimized = optimize_overlay_detections(detections)
+
+        self.assertEqual(
+            self._as_tuples(optimized),
+            [
+                ("fire", 0.91, 100, 100, 300, 300),
+                ("smoke", 0.88, 115, 115, 280, 280),
+                ("fire", 0.77, 500, 100, 620, 240),
+            ],
+        )
+
+    def test_optimize_overlay_detections_keeps_non_hazard_overlaps_by_default(self):
+        detections = [
+            Detection("person", 0.91, 100, 100, 300, 300),
+            Detection("person", 0.82, 120, 120, 240, 240),
+        ]
+
+        optimized = optimize_overlay_detections(detections)
+
+        self.assertEqual(self._as_tuples(optimized), self._as_tuples(detections))
 
     def test_detect_batch_runs_tiled_hazard_pass_and_remaps_results(self):
         old_values = {

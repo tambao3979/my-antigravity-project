@@ -1,8 +1,10 @@
 ultralytics
 opencv-python
-requests
+requests>=2.33.1
 python-dotenv
 customtkinter
-pillow
+pillow>=12.2.0
 psutil
-pynvml
+nvidia-ml-py
+openpyxl
+lap
